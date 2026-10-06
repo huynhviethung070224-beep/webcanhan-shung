@@ -1,0 +1,316 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroOrbit from '../components/HeroOrbit.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../config/site';
+import { getFeaturedProjects, getPosts, formatDate, readingTime } from '../utils/content';
+
+const projects = await getFeaturedProjects();
+const posts = await getPosts();
+const latest = posts[0];
+---
+
+<BaseLayout ogKey="home">
+  <section class="hero" aria-labelledby="hero-title">
+    <HeroOrbit />
+    <div class="container hero__inner">
+      <p class="eyebrow hero__eyebrow">{site.facts.program} · {site.facts.school}</p>
+      <h1 id="hero-title" class="hero__title">
+        <span class="hero__name">{site.fullName}</span>
+        <span class="hero__nick serif">({site.nickname})</span>
+      </h1>
+      <p class="hero__intro">{site.intro}</p>
+      <div class="hero__actions">
+        <a href="/projects" class="btn btn--primary">
+          View Projects <Icon name="arrow-right" size={18} class="arrow" />
+        </a>
+        <a href="/about" class="btn btn--ghost">About Me</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="work-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Selected work</p>
+        <h2 id="work-title">Two projects, two sides of the stack</h2>
+      </div>
+      <div class="work">
+        {
+          projects.map((project, i) => (
+            <div class="reveal" style={`--reveal-delay:${i * 80}ms`}>
+              <ProjectCard project={project} index={i} layout="feature" />
+            </div>
+          ))
+        }
+      </div>
+      <div class="reveal work__more">
+        <a href="/projects" class="textlink">
+          All projects <Icon name="arrow-right" size={18} class="arrow" />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="portfolio-title">
+    <div class="container">
+      <hr class="rule" />
+      <div class="portfolio-preview reveal">
+        <div>
+          <p class="eyebrow">For recruiters</p>
+          <h2 id="portfolio-title" class="portfolio-preview__title">A quick professional overview</h2>
+        </div>
+        <div class="portfolio-preview__body">
+          <p class="muted">
+            Education at {site.facts.school}, the skills behind each project, and what I actually built. The Portfolio
+            page groups it so you can get the picture in a minute.
+          </p>
+          <dl class="portfolio-preview__facts">
+            <div>
+              <dt class="mono">Education</dt>
+              <dd>{site.facts.program}, {site.facts.school}</dd>
+            </div>
+            <div>
+              <dt class="mono">Backend & data</dt>
+              <dd>JavaScript, Firebase Authentication, Cloud Firestore</dd>
+            </div>
+            <div>
+              <dt class="mono">Databases</dt>
+              <dd>PostgreSQL, SQL, relational design</dd>
+            </div>
+          </dl>
+          <a href="/portfolio" class="btn btn--ghost btn--sm">
+            Open Portfolio <Icon name="arrow-right" size={16} class="arrow" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    latest && (
+      <section class="section" aria-labelledby="latest-title">
+        <div class="container">
+          <hr class="rule" />
+          <div class="latest reveal">
+            <p class="eyebrow">Latest article</p>
+            <h2 id="latest-title" class="latest__title">
+              <a href={`/blog/${latest.id}`}>{latest.data.title}</a>
+            </h2>
+            <p class="muted">{latest.data.description}</p>
+            <p class="mono muted">
+              {formatDate(latest.data.publishedAt)} · {readingTime(latest.body).minutes} min read
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section" aria-labelledby="contact-title">
+    <div class="container">
+      <div class="contact-cta reveal">
+        <div>
+          <p class="eyebrow">Connect</p>
+          <h2 id="contact-title" class="contact-cta__title">Say hello, or follow the work.</h2>
+        </div>
+        <a href="/contact" class="btn btn--primary">
+          Go to Contact <Icon name="arrow-right" size={18} class="arrow" />
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(4rem, 10vh, 8rem) clamp(4rem, 8vh, 7rem);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .hero__title {
+    font-size: var(--text-display);
+    font-weight: 600;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.035em;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.25em;
+    row-gap: 0;
+    max-width: 14ch;
+  }
+
+  .hero__name {
+    display: inline-block;
+    text-wrap: balance;
+  }
+
+  .hero__nick {
+    color: var(--accent);
+    font-size: 1.04em;
+    white-space: nowrap;
+  }
+
+  .hero__intro {
+    max-width: 62ch;
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--text-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  /* Hero entrance (content remains visible with JS or animations disabled) */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__eyebrow,
+    .hero__title,
+    .hero__intro,
+    .hero__actions {
+      animation: rise 600ms var(--ease-out) both;
+    }
+    .hero__title {
+      animation-delay: 60ms;
+    }
+    .hero__intro {
+      animation-delay: 140ms;
+    }
+    .hero__actions {
+      animation-delay: 220ms;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .work {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3rem, 6vw, 5rem);
+  }
+
+  .work__more {
+    margin-top: var(--space-7);
+  }
+
+  .portfolio-preview {
+    display: grid;
+    gap: var(--space-6);
+    padding-top: var(--section-gap);
+  }
+
+  @media (min-width: 900px) {
+    .portfolio-preview {
+      grid-template-columns: 5fr 7fr;
+      gap: var(--space-8);
+    }
+  }
+
+  .portfolio-preview__title {
+    margin-top: var(--space-3);
+    font-size: var(--text-3xl);
+    font-weight: 500;
+    max-width: 14ch;
+  }
+
+  .portfolio-preview__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    align-items: flex-start;
+  }
+
+  .portfolio-preview__facts {
+    display: grid;
+    gap: var(--space-4);
+    width: 100%;
+    border-top: 1px solid var(--border);
+  }
+
+  .portfolio-preview__facts > div {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media (min-width: 640px) {
+    .portfolio-preview__facts > div {
+      grid-template-columns: 160px 1fr;
+      gap: var(--space-4);
+    }
+  }
+
+  .portfolio-preview__facts dt {
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--text-xs);
+    padding-top: 0.2em;
+  }
+
+  .latest {
+    padding-top: var(--section-gap);
+    display: grid;
+    gap: var(--space-3);
+    max-width: var(--prose-width);
+  }
+
+  .latest__title {
+    font-size: var(--text-2xl);
+    font-weight: 500;
+  }
+
+  .latest__title a {
+    text-decoration: none;
+  }
+
+  .latest__title a:hover {
+    color: var(--accent);
+  }
+
+  .contact-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding: clamp(2rem, 4vw, 3.5rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(80% 120% at 100% 0%, rgba(213, 247, 139, 0.1), transparent 60%),
+      var(--bg-elevated);
+  }
+
+  .contact-cta__title {
+    margin-top: var(--space-3);
+    font-size: var(--text-3xl);
+    font-weight: 500;
+    max-width: 16ch;
+  }
+</style>

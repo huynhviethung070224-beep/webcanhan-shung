@@ -1,0 +1,161 @@
+---
+import { site, navRoutes } from '../config/site';
+import { publishedSocialLinks } from '../config/social';
+import BrandMark from './BrandMark.astro';
+import Icon from './Icon.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <a href="/" class="site-footer__home" aria-label={`${site.displayName} — Home`}>
+          <BrandMark size={34} />
+          <span>
+            {site.fullName} <span class="serif muted">({site.nickname})</span>
+          </span>
+        </a>
+        <p class="muted site-footer__tagline">{site.tagline}</p>
+      </div>
+
+      <nav class="site-footer__nav" aria-label="Footer">
+        <p class="eyebrow eyebrow--plain">Pages</p>
+        <ul>
+          <li><a href="/">Home</a></li>
+          {navRoutes.map((route) => <li><a href={route.href}>{route.label}</a></li>)}
+        </ul>
+      </nav>
+
+      <div class="site-footer__connect">
+        <p class="eyebrow eyebrow--plain">Connect</p>
+        <ul class="site-footer__social">
+          {
+            publishedSocialLinks.map((link) => (
+              <li>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${link.label} (opens in a new tab)`}
+                  title={link.label}
+                >
+                  <Icon name={link.icon} size={18} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <a href="/contact" class="textlink site-footer__all">
+          All links on Contact <Icon name="arrow-right" size={16} class="arrow" />
+        </a>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p class="mono">© {year} {site.displayName}</p>
+      <p class="mono">Designed and built in Astro.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding-block: var(--space-8) var(--space-6);
+    background: var(--bg-sunken);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  @media (min-width: 720px) {
+    .site-footer__grid {
+      grid-template-columns: 1.6fr 1fr 1fr;
+    }
+  }
+
+  .site-footer__home {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .site-footer__tagline {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .site-footer__nav ul,
+  .site-footer__social {
+    list-style: none;
+  }
+
+  .site-footer__nav ul {
+    margin-top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .site-footer__nav a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+  }
+
+  .site-footer__nav a:hover {
+    color: var(--accent);
+  }
+
+  .site-footer__social {
+    margin-top: var(--space-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .site-footer__social a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
+  }
+
+  .site-footer__social a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .site-footer__all {
+    margin-top: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  .site-footer__bottom {
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-3);
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+  }
+</style>

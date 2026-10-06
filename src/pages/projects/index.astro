@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getProjects } from '../../utils/content';
+
+const projects = await getProjects();
+const title = 'Projects';
+const description =
+  'Projects by Huynh Viet Hung (Ian): DragonGo, a campus navigation app with Firebase backend work, and a PostgreSQL Library Management System with a normalized six-table schema.';
+---
+
+<BaseLayout title={title} description={description} ogKey="projects">
+  <PageHead
+    eyebrow="Projects"
+    title="Products and technical case studies."
+    lead="Each project opens its own case study: purpose, my role, the stack, and what I built. The collection starts with two."
+  />
+
+  <section class="section">
+    <div class="container">
+      <ol class="list">
+        {
+          projects.map((project, i) => (
+            <li class="list__item reveal" style={`--reveal-delay:${i * 80}ms`}>
+              <ProjectCard project={project} index={i} layout="feature" headingLevel="h2" loading={i === 0 ? 'eager' : 'lazy'} />
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .list__item {
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list__item:first-child {
+    padding-top: 0;
+  }
+
+  .list__item:last-child {
+    border-bottom: 0;
+  }
+</style>

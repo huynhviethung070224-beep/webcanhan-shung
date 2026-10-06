@@ -1,0 +1,343 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../config/site';
+
+const title = 'About Me';
+const description = `${site.displayName} is a Data Science student at Drexel University from Vietnam, interested in data, software development, and AI.`;
+const initials = site.fullName
+  .split(' ')
+  .map((w) => w[0])
+  .join('');
+---
+
+<BaseLayout title={title} description={description} ogKey="about">
+  <PageHead
+    eyebrow="About Me"
+    title="The person behind the work."
+    lead={`${site.displayName} — ${site.facts.program} student at ${site.facts.school}, originally from ${site.facts.origin}.`}
+  />
+
+  <section class="section">
+    <div class="container about">
+      <div class="about__visual reveal">
+        {
+          site.portrait ? (
+            <img
+              src={site.portrait.src}
+              alt={site.portrait.alt}
+              width={site.portrait.width}
+              height={site.portrait.height}
+              class="about__portrait"
+              loading="eager"
+              decoding="async"
+            />
+          ) : (
+            <div class="monogram" aria-hidden="true">
+              <span class="monogram__initials">{initials}</span>
+              <span class="monogram__nick serif">({site.nickname})</span>
+              <svg class="monogram__orbit" viewBox="0 0 400 400" fill="none">
+                <circle cx="200" cy="200" r="180" stroke="#2B2F2B" />
+                <circle cx="200" cy="200" r="180" stroke="#D5F78B" stroke-opacity="0.4" stroke-dasharray="2 12" />
+                <circle cx="380" cy="200" r="4" fill="#D5F78B" />
+                <circle cx="73" cy="327" r="3" fill="#B0B5B0" />
+              </svg>
+            </div>
+          )
+        }
+        <dl class="about__facts">
+          <div>
+            <dt class="mono">Studying</dt>
+            <dd>{site.facts.program}, {site.facts.school}</dd>
+          </div>
+          <div>
+            <dt class="mono">From</dt>
+            <dd>{site.facts.origin}</dd>
+          </div>
+          <div>
+            <dt class="mono">Interested in</dt>
+            <dd>{site.facts.interests.join(', ')}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="about__narrative">
+        <section class="about__block reveal" aria-labelledby="bg-title">
+          <h2 id="bg-title">Background</h2>
+          <p>
+            I’m {site.displayName}, a {site.facts.program} student at {site.facts.school}. I’m from {site.facts.origin},
+            and I’m interested in data, software development, and AI.
+          </p>
+          <p>
+            I like turning ideas into working applications and exploring how technology can solve practical problems.
+            Through my projects and internship experience, I’m building technical skills alongside an understanding of
+            how businesses work.
+          </p>
+        </section>
+
+        <section class="about__block reveal" aria-labelledby="work-title">
+          <h2 id="work-title">How I work</h2>
+          <p>
+            The two projects on this site show the two sides of the stack I’ve worked on so far. On{' '}
+            <a href="/projects/dragon-go">DragonGo</a> I built backend and database functionality: Firebase
+            Authentication and synchronized per-user schedules and account data. On the{' '}
+            <a href="/projects/library-management-system">Library Management System</a> I designed a normalized
+            PostgreSQL schema and wrote the SQL reports on top of it.
+          </p>
+          <p>
+            AI is an interest and part of the documented DragonGo product (AI-assisted scheduling); data and software
+            development are where I’ve done the hands-on work.
+          </p>
+        </section>
+
+        <section class="about__block reveal" aria-labelledby="timeline-title">
+          <h2 id="timeline-title">Education and experience</h2>
+          <ol class="timeline">
+            {
+              site.education.map((item) => (
+                <li class="timeline__item">
+                  <span class="timeline__marker" aria-hidden="true" />
+                  <div>
+                    <p class="timeline__head">
+                      <span class="timeline__title">{item.institution}</span>
+                      {item.period && <span class="mono muted">{item.period}</span>}
+                    </p>
+                    <p class="muted">{item.detail}</p>
+                  </div>
+                </li>
+              ))
+            }
+            {
+              site.experience.map((item) => (
+                <li class="timeline__item">
+                  <span class="timeline__marker" aria-hidden="true" />
+                  <div>
+                    <p class="timeline__head">
+                      <span class="timeline__title">{item.title}</span>
+                      {item.period && <span class="mono muted">{item.period}</span>}
+                    </p>
+                    <p class="muted">{item.detail}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </section>
+
+        <section class="about__block reveal" aria-labelledby="beyond-title">
+          <h2 id="beyond-title">Beyond the screen</h2>
+          <p>When I’m not at a keyboard, you’ll probably find me on a court or a course.</p>
+          <ul class="hobbies" aria-label="Interests">
+            {site.facts.hobbies.map((hobby) => <li class="hobby">{hobby}</li>)}
+          </ul>
+        </section>
+
+        <div class="about__links reveal">
+          <a href="/portfolio" class="btn btn--primary">
+            Professional overview <Icon name="arrow-right" size={18} class="arrow" />
+          </a>
+          <a href="/contact" class="btn btn--ghost">Contact</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 900px) {
+    .about {
+      grid-template-columns: 5fr 7fr;
+      gap: var(--space-9);
+      align-items: start;
+    }
+    .about__visual {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+
+  .about__portrait {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
+
+  .monogram {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(90% 70% at 90% 0%, rgba(213, 247, 139, 0.1), transparent 60%),
+      linear-gradient(160deg, #181c18, #111411);
+    overflow: hidden;
+  }
+
+  .monogram__initials {
+    font-size: clamp(5rem, 14vw, 9rem);
+    font-weight: 600;
+    letter-spacing: -0.06em;
+    line-height: 0.9;
+  }
+
+  .monogram__nick {
+    margin-top: var(--space-2);
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--accent);
+  }
+
+  .monogram__orbit {
+    position: absolute;
+    top: -20%;
+    right: -30%;
+    width: 110%;
+    height: auto;
+    pointer-events: none;
+  }
+
+  .about__facts {
+    margin-top: var(--space-5);
+    border-top: 1px solid var(--border);
+  }
+
+  .about__facts > div {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border);
+    font-size: var(--text-sm);
+  }
+
+  .about__facts dt {
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    font-size: var(--text-xs);
+    padding-top: 0.25em;
+  }
+
+  .about__narrative {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    max-width: var(--prose-width);
+  }
+
+  .about__block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .about__block h2 {
+    font-size: var(--text-2xl);
+    font-weight: 500;
+  }
+
+  .about__block p {
+    color: var(--text-muted);
+    line-height: var(--leading-relaxed);
+  }
+
+  .about__block a:not(.btn) {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-line);
+  }
+
+  .about__block a:not(.btn):hover {
+    color: var(--accent);
+  }
+
+  .timeline {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin-top: var(--space-2);
+  }
+
+  .timeline__item {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: var(--space-4);
+    position: relative;
+  }
+
+  .timeline__item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 20px;
+    bottom: calc(-1 * var(--space-5));
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline__marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    display: grid;
+    place-items: center;
+    margin-top: 2px;
+  }
+
+  .timeline__marker::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .timeline__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-3);
+    color: var(--text);
+  }
+
+  .timeline__title {
+    font-weight: 600;
+  }
+
+  .hobbies {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .hobby {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 0.9rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    text-transform: capitalize;
+    font-size: var(--text-sm);
+  }
+
+  .about__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

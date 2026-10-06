@@ -1,0 +1,115 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import SocialTile from '../components/SocialTile.astro';
+import CopyButton from '../components/CopyButton.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../config/site';
+import { publishedSocialLinks } from '../config/social';
+
+const title = 'Contact';
+const description = `Connect with ${site.displayName} on GitHub, LinkedIn, YouTube, Instagram, and Facebook.`;
+---
+
+<BaseLayout title={title} description={description} ogKey="contact">
+  <PageHead
+    eyebrow="Contact"
+    title="Connect with me."
+    lead="I’m happy to hear about internship and co-op opportunities, collaborations, or anything related to data and software. Every profile below is mine — pick whichever you prefer."
+    size="md"
+  />
+
+  <section class="section" aria-labelledby="connect-title">
+    <div class="container">
+      <h2 id="connect-title" class="visually-hidden">Social profiles</h2>
+      <ul class="tiles">
+        {
+          publishedSocialLinks.map((link, i) => (
+            <li class="reveal" style={`--reveal-delay:${i * 50}ms`}>
+              <SocialTile link={link} />
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        site.contactEmail && (
+          <div class="email reveal">
+            <div class="email__text">
+              <p class="eyebrow">Email</p>
+              <a href={`mailto:${site.contactEmail}`} class="email__address">
+                {site.contactEmail}
+              </a>
+            </div>
+            <div class="email__actions">
+              <a href={`mailto:${site.contactEmail}`} class="btn btn--primary">
+                Send an email <Icon name="mail" size={18} />
+              </a>
+              <CopyButton value={site.contactEmail} label="Copy email" successLabel="Email copied" />
+            </div>
+          </div>
+        )
+      }
+
+      <p class="note muted reveal">All profile links open in a new tab.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .tiles {
+    list-style: none;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 560px) {
+    .tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 960px) {
+    .tiles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .email {
+    margin-top: var(--space-7);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+  }
+
+  .email__address {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .email__address:hover {
+    color: var(--accent);
+  }
+
+  .email__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .note {
+    margin-top: var(--space-6);
+    font-size: var(--text-sm);
+  }
+</style>

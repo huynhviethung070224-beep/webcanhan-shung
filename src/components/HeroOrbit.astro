@@ -1,0 +1,106 @@
+---
+/**
+ * Quiet abstract motif behind the hero: concentric orbits with a few
+ * connected nodes, suggesting data and software. Purely decorative.
+ */
+---
+
+<svg
+  class="hero-orbit"
+  viewBox="0 0 900 900"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+  preserveAspectRatio="xMidYMid slice"
+>
+  <defs>
+    <radialGradient id="orbit-fade" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D5F78B" stop-opacity="0.08"></stop>
+      <stop offset="60%" stop-color="#D5F78B" stop-opacity="0.02"></stop>
+      <stop offset="100%" stop-color="#D5F78B" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+  <circle cx="450" cy="450" r="440" fill="url(#orbit-fade)"></circle>
+
+  <g stroke="#2B2F2B" stroke-width="1">
+    <circle cx="450" cy="450" r="400"></circle>
+    <circle cx="450" cy="450" r="300"></circle>
+    <circle cx="450" cy="450" r="190" stroke="#3A403A"></circle>
+  </g>
+
+  <g class="orbit orbit--outer">
+    <circle cx="450" cy="450" r="400" stroke="#D5F78B" stroke-opacity="0.35" stroke-width="1" stroke-dasharray="2 14"></circle>
+  </g>
+  <g class="orbit orbit--inner">
+    <circle cx="450" cy="450" r="190" stroke="#D5F78B" stroke-opacity="0.25" stroke-width="1" stroke-dasharray="1 9"></circle>
+  </g>
+
+  <g class="links" stroke="#D5F78B" stroke-opacity="0.35" stroke-width="1">
+    <path d="M450 260 L584 584"></path>
+    <path d="M584 584 L750 450"></path>
+    <path d="M450 260 L150 450"></path>
+  </g>
+  <g class="nodes">
+    <circle cx="750" cy="450" r="4" fill="#D5F78B"></circle>
+    <circle cx="150" cy="450" r="3" fill="#B0B5B0"></circle>
+    <circle cx="450" cy="260" r="5" fill="#D5F78B"></circle>
+    <circle cx="584" cy="584" r="3" fill="#F4F6ED" fill-opacity="0.7"></circle>
+    <circle cx="450" cy="450" r="2.5" fill="#F4F6ED"></circle>
+  </g>
+</svg>
+
+<style>
+  .hero-orbit {
+    position: absolute;
+    top: 50%;
+    right: -10%;
+    width: min(92vw, 820px);
+    height: min(92vw, 820px);
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.9;
+  }
+
+  @media (max-width: 900px) {
+    .hero-orbit {
+      right: -45%;
+      top: 45%;
+      width: 150vw;
+      height: 150vw;
+      opacity: 0.6;
+    }
+  }
+
+  .orbit {
+    transform-origin: 450px 450px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .orbit--outer {
+      animation: spin 180s linear infinite;
+    }
+    .orbit--inner {
+      animation: spin 90s linear infinite reverse;
+    }
+    .links {
+      animation: pulse 6s ease-in-out infinite;
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      stroke-opacity: 0.2;
+    }
+    50% {
+      stroke-opacity: 0.5;
+    }
+  }
+</style>

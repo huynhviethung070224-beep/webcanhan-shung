@@ -1,0 +1,120 @@
+---
+/**
+ * Accessible zoom for captioned images. Any element with `data-lightbox`
+ * (an <a href="full.png"> around an <img>) opens here. Includes visible
+ * close control, Escape handling and focus return.
+ */
+import Icon from './Icon.astro';
+---
+
+<dialog class="lightbox" data-lightbox-dialog aria-label="Image preview">
+  <button class="lightbox__close" type="button" data-lightbox-close aria-label="Close image preview">
+    <Icon name="close" size={22} />
+  </button>
+  <figure class="lightbox__figure">
+    <img class="lightbox__img" alt="" data-lightbox-img />
+    <figcaption class="lightbox__caption" data-lightbox-caption></figcaption>
+  </figure>
+</dialog>
+
+<style>
+  .lightbox {
+    border: 0;
+    padding: 0;
+    max-width: 100vw;
+    max-height: 100dvh;
+    width: 100vw;
+    height: 100dvh;
+    background: rgba(8, 10, 8, 0.92);
+    color: var(--text);
+  }
+
+  .lightbox::backdrop {
+    background: transparent;
+  }
+
+  .lightbox[open] {
+    display: grid;
+    place-items: center;
+    padding: var(--gutter);
+  }
+
+  .lightbox__close {
+    position: fixed;
+    top: var(--space-4);
+    right: var(--space-4);
+    width: var(--control-height);
+    height: var(--control-height);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+    color: var(--text);
+  }
+
+  .lightbox__close:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .lightbox__figure {
+    display: grid;
+    gap: var(--space-3);
+    max-width: min(100%, 1400px);
+  }
+
+  .lightbox__img {
+    max-width: 100%;
+    max-height: calc(100dvh - var(--gutter) * 2 - 3rem);
+    width: auto;
+    height: auto;
+    margin-inline: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .lightbox__caption {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .lightbox__caption:empty {
+    display: none;
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+  if (dialog && typeof dialog.showModal === 'function') {
+    const img = dialog.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
+    const caption = dialog.querySelector<HTMLElement>('[data-lightbox-caption]')!;
+    const closeBtn = dialog.querySelector<HTMLButtonElement>('[data-lightbox-close]')!;
+    let opener: HTMLElement | null = null;
+
+    document.querySelectorAll<HTMLAnchorElement>('a[data-lightbox]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        opener = link;
+        const thumb = link.querySelector('img');
+        img.src = link.href;
+        img.alt = thumb?.alt ?? '';
+        caption.textContent = link.dataset.caption ?? '';
+        dialog.showModal();
+        closeBtn.focus();
+      });
+    });
+
+    const close = () => dialog.close();
+    closeBtn.addEventListener('click', close);
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) close();
+    });
+    dialog.addEventListener('close', () => {
+      img.removeAttribute('src');
+      opener?.focus();
+    });
+  }
+</script>

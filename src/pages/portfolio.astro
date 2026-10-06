@@ -1,0 +1,378 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../config/site';
+import { skillGroups, certificates } from '../config/portfolio';
+import { getProjects } from '../utils/content';
+
+const title = 'Portfolio';
+const description = `Professional overview of ${site.displayName}: education at Drexel University, skills demonstrated through DragonGo and the Library Management System, and contributions.`;
+const projects = await getProjects();
+---
+
+<BaseLayout title={title} description={description} ogKey="portfolio">
+  <PageHead
+    eyebrow="Portfolio"
+    title="A quick professional overview."
+    lead="Education, the skills behind each project, and what I actually built — with every skill linked to the case study that backs it up."
+  >
+    <div class="head-actions">
+      {
+        site.cvPath ? (
+          <a href={site.cvPath} class="btn btn--primary" download>
+            Download CV <Icon name="download" size={18} />
+          </a>
+        ) : (
+          <a href="/projects" class="btn btn--primary">
+            See the projects <Icon name="arrow-right" size={18} class="arrow" />
+          </a>
+        )
+      }
+      <a href="/contact" class="btn btn--ghost">Contact</a>
+    </div>
+  </PageHead>
+
+  <section class="section" aria-labelledby="edu-title">
+    <div class="container two-col">
+      <div class="two-col__aside reveal">
+        <p class="eyebrow">Education</p>
+        <h2 id="edu-title" class="h2">Where I’m studying</h2>
+      </div>
+      <div class="two-col__main reveal">
+        <ul class="facts">
+          {
+            site.education.map((item) => (
+              <li class="facts__row">
+                <div>
+                  <p class="facts__title">{item.institution}</p>
+                  <p class="muted">{item.detail}</p>
+                </div>
+                {item.period && <span class="mono muted">{item.period}</span>}
+              </li>
+            ))
+          }
+          {
+            site.experience.map((item) => (
+              <li class="facts__row">
+                <div>
+                  <p class="facts__title">{item.title}</p>
+                  <p class="muted">{item.detail}</p>
+                </div>
+                {item.period && <span class="mono muted">{item.period}</span>}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="skills-title">
+    <div class="container">
+      <hr class="rule" />
+      <div class="two-col two-col--pad">
+        <div class="two-col__aside reveal">
+          <p class="eyebrow">Skills</p>
+          <h2 id="skills-title" class="h2">Grouped by the work that proves them</h2>
+          <p class="muted aside-note">
+            Each group comes from a real project. Open the case study to see what the skill was used for.
+          </p>
+        </div>
+        <div class="two-col__main groups">
+          {
+            skillGroups.map((group, i) => (
+              <article class="group reveal" style={`--reveal-delay:${i * 80}ms`} aria-labelledby={`group-${group.projectSlug}`}>
+                <div class="group__head">
+                  <h3 id={`group-${group.projectSlug}`} class="group__title">
+                    {group.title}
+                  </h3>
+                  <a href={`/projects/${group.projectSlug}`} class="textlink group__evidence">
+                    Evidence: {group.projectTitle} <Icon name="arrow-right" size={16} class="arrow" />
+                  </a>
+                </div>
+                <p class="mono muted group__role">{group.role}</p>
+                <ul class="tags" aria-label={`${group.title} skills`}>
+                  {group.skills.map((skill) => (
+                    <li class="tag">{skill}</li>
+                  ))}
+                </ul>
+                <ul class="group__contrib">
+                  {group.contributions.map((c) => (
+                    <li>{c}</li>
+                  ))}
+                </ul>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="selected-title">
+    <div class="container">
+      <hr class="rule" />
+      <div class="two-col two-col--pad">
+        <div class="two-col__aside reveal">
+          <p class="eyebrow">Selected work</p>
+          <h2 id="selected-title" class="h2">Project summaries</h2>
+        </div>
+        <ul class="two-col__main summaries reveal">
+          {
+            projects.map((project) => (
+              <li class="summary">
+                <div class="summary__text">
+                  <p class="summary__title">
+                    <a href={`/projects/${project.id}`}>{project.data.title}</a>
+                  </p>
+                  <p class="mono muted">{project.data.role}</p>
+                  <p class="muted">{project.data.tagline}</p>
+                </div>
+                <ul class="tags" aria-label="Technologies">
+                  {project.data.technologies.map((t) => (
+                    <li class="tag">{t}</li>
+                  ))}
+                </ul>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {
+    certificates.length > 0 && (
+      <section class="section" aria-labelledby="cert-title">
+        <div class="container">
+          <hr class="rule" />
+          <div class="two-col two-col--pad">
+            <div class="two-col__aside reveal">
+              <p class="eyebrow">Certificates</p>
+              <h2 id="cert-title" class="h2">Credentials</h2>
+            </div>
+            <ul class="two-col__main facts reveal">
+              {certificates.map((c) => (
+                <li class="facts__row">
+                  <div>
+                    <p class="facts__title">{c.url ? <a href={c.url}>{c.title}</a> : c.title}</p>
+                    <p class="muted">{c.issuer}</p>
+                  </div>
+                  {c.year && <span class="mono muted">{c.year}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section" aria-labelledby="cv-title">
+    <div class="container">
+      <div class="cv reveal">
+        <div>
+          <p class="eyebrow">CV</p>
+          <h2 id="cv-title" class="h2">{site.cvPath ? 'Download the current CV' : 'Prefer a conversation?'}</h2>
+          <p class="muted cv__note">
+            {
+              site.cvPath
+                ? 'A PDF copy of my current CV, matching the information on this page.'
+                : 'Everything on this page reflects my current work. For anything else, the Contact page has every way to reach me.'
+            }
+          </p>
+        </div>
+        <div class="head-actions">
+          {
+            site.cvPath ? (
+              <a href={site.cvPath} class="btn btn--primary" download>
+                Download CV <Icon name="download" size={18} />
+              </a>
+            ) : (
+              <a href="/contact" class="btn btn--primary">
+                Get in touch <Icon name="arrow-right" size={18} class="arrow" />
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .h2 {
+    margin-top: var(--space-3);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    max-width: 16ch;
+  }
+
+  .aside-note {
+    margin-top: var(--space-4);
+    font-size: var(--text-sm);
+    max-width: 32ch;
+  }
+
+  .two-col {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .two-col--pad {
+    padding-top: var(--section-gap);
+  }
+
+  @media (min-width: 900px) {
+    .two-col {
+      grid-template-columns: 4fr 8fr;
+      gap: var(--space-8);
+    }
+  }
+
+  .facts {
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .facts__row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .facts__title {
+    font-weight: 600;
+  }
+
+  .groups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .group {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .group__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+
+  .group__title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+  }
+
+  .group__evidence {
+    font-size: var(--text-sm);
+  }
+
+  .group__role {
+    margin-top: calc(-1 * var(--space-2));
+  }
+
+  .group__contrib {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-4);
+  }
+
+  .group__contrib li {
+    display: grid;
+    grid-template-columns: 10px 1fr;
+    gap: var(--space-3);
+  }
+
+  .group__contrib li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 0.6em;
+  }
+
+  .summaries {
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .summary {
+    display: grid;
+    gap: var(--space-3);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media (min-width: 720px) {
+    .summary {
+      grid-template-columns: 1fr auto;
+      align-items: start;
+    }
+  }
+
+  .summary__text {
+    display: grid;
+    gap: var(--space-1);
+    max-width: 48ch;
+  }
+
+  .summary__title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .summary__title a {
+    text-decoration: none;
+  }
+
+  .summary__title a:hover {
+    color: var(--accent);
+  }
+
+  .cv {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+  }
+
+  .cv .head-actions {
+    margin-top: 0;
+  }
+
+  .cv__note {
+    margin-top: var(--space-3);
+    max-width: 50ch;
+  }
+</style>

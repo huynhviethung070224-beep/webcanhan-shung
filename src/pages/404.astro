@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<BaseLayout title="Page not found" description="This page does not exist." ogKey="home" noindex>
+  <section class="nf">
+    <div class="container nf__inner">
+      <p class="eyebrow">404</p>
+      <h1 class="nf__title">
+        This route doesn’t exist<span class="serif nf__accent">, yet</span>.
+      </h1>
+      <p class="muted nf__text">
+        The page you’re looking for may have moved or never existed. The projects are the best place to start.
+      </p>
+      <div class="nf__actions">
+        <a href="/" class="btn btn--primary">
+          <Icon name="arrow-left" size={18} /> Home
+        </a>
+        <a href="/projects" class="btn btn--ghost">
+          Projects <Icon name="arrow-right" size={18} class="arrow" />
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    padding-block: clamp(5rem, 16vh, 10rem);
+  }
+
+  .nf__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    max-width: var(--prose-width);
+  }
+
+  .nf__title {
+    font-size: clamp(2.25rem, 1.5rem + 3.5vw, 4rem);
+    font-weight: 500;
+  }
+
+  .nf__accent {
+    color: var(--accent);
+  }
+
+  .nf__text {
+    font-size: var(--text-lg);
+  }
+
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

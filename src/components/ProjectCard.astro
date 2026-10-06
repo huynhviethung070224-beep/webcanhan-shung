@@ -1,0 +1,141 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ProjectCover from './ProjectCover.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  index?: number;
+  /** "feature" = large asymmetric preview, "grid" = compact. */
+  layout?: 'feature' | 'grid';
+  loading?: 'lazy' | 'eager';
+  /** Heading level that fits the page outline (h3 under a section h2, h2 on the Projects index). */
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { project, index = 0, layout = 'feature', loading = 'lazy', headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const { data } = project;
+const href = `/projects/${project.id}`;
+const number = String(index + 1).padStart(2, '0');
+---
+
+<article class:list={['card', `card--${layout}`, { 'card--flip': layout === 'feature' && index % 2 === 1 }]}>
+  <a href={href} class="card__cover" aria-hidden="true" tabindex="-1">
+    <ProjectCover variant={data.cover} title={data.title} alt={data.coverAlt} image={data.coverImage} loading={loading} />
+  </a>
+  <div class="card__body">
+    <p class="eyebrow eyebrow--plain">
+      <span class="mono">{number}</span>
+      <span aria-hidden="true">·</span>
+      <span>{data.role}</span>
+    </p>
+    <Heading class="card__title">
+      <a href={href} class="card__link">
+        {data.title}
+        <Icon name="arrow-up-right" size={22} class="arrow" />
+      </a>
+    </Heading>
+    <p class="card__summary">{layout === 'feature' ? data.summary : data.tagline}</p>
+    <ul class="tags" aria-label="Technologies">
+      {data.technologies.map((tech) => <li class="tag">{tech}</li>)}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+
+  .card--feature {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 900px) {
+    .card--feature {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--space-8);
+    }
+    .card--flip .card__cover {
+      order: 2;
+    }
+    .card--flip .card__body {
+      order: 1;
+    }
+  }
+
+  .card--grid {
+    align-content: start;
+  }
+
+  .card__cover {
+    display: block;
+    border-radius: var(--radius-lg);
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .card:hover .card__cover {
+    transform: translateY(-2px);
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .card__title {
+    font-size: var(--text-2xl);
+    font-weight: 500;
+  }
+
+  .card--grid .card__title {
+    font-size: var(--text-xl);
+  }
+
+  .card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .card__link::after {
+    /* Stretch the whole card as a hit target while keeping one link in the tab order. */
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .card {
+    position: relative;
+  }
+
+  .card__link .arrow {
+    color: var(--accent);
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .card:hover .card__link .arrow,
+  .card__link:focus-visible .arrow {
+    transform: translate(2px, -2px);
+  }
+
+  .card__link:focus-visible {
+    outline-offset: 6px;
+  }
+
+  .card__summary {
+    color: var(--text-muted);
+    line-height: var(--leading-relaxed);
+    max-width: 48ch;
+  }
+
+  .card--grid .card__summary {
+    font-size: var(--text-sm);
+  }
+</style>

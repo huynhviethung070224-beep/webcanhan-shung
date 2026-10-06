@@ -1,0 +1,383 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCover from '../../components/ProjectCover.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import Icon from '../../components/Icon.astro';
+import { getProjects } from '../../utils/content';
+import '../../styles/prose.css';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+const { project, next } = Astro.props;
+const { data } = project;
+const { Content, headings } = await render(project);
+const hasNext = next && next.id !== project.id;
+const hasFacts = data.period || data.teamSize || data.status;
+---
+
+<BaseLayout title={data.title} description={data.summary} ogKey={`projects/${project.id}`}>
+  <article class="case">
+    <header class="case__head">
+      <div class="container">
+        <a href="/projects" class="textlink back">
+          <Icon name="arrow-left" size={16} class="arrow" /> Back to Projects
+        </a>
+        <p class="eyebrow case__eyebrow">{data.role}</p>
+        <h1 class="case__title">{data.title}</h1>
+        <p class="case__tagline">{data.tagline}</p>
+        <ul class="tags case__tags" aria-label="Technologies">
+          {data.technologies.map((t) => <li class="tag">{t}</li>)}
+        </ul>
+        {
+          (data.demoUrl || data.repoUrl) && (
+            <div class="case__actions">
+              {data.demoUrl && (
+                <a href={data.demoUrl} class="btn btn--primary btn--sm" target="_blank" rel="noopener noreferrer">
+                  Live Demo <Icon name="external" size={16} />
+                </a>
+              )}
+              {data.repoUrl && (
+                <a href={data.repoUrl} class="btn btn--ghost btn--sm" target="_blank" rel="noopener noreferrer">
+                  View Code <Icon name="external" size={16} />
+                </a>
+              )}
+            </div>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="case__cover">
+        <ProjectCover variant={data.cover} title={data.title} alt={data.coverAlt} image={data.coverImage} size="hero" loading="eager" />
+      </div>
+    </div>
+
+    <div class="container case__body">
+      <aside class="case__aside">
+        <dl class="overview">
+          <div>
+            <dt>Purpose</dt>
+            <dd>{data.purpose}</dd>
+          </div>
+          <div>
+            <dt>Role</dt>
+            <dd>{data.role}</dd>
+          </div>
+          <div>
+            <dt>Stack</dt>
+            <dd>{data.technologies.join(', ')}</dd>
+          </div>
+          {
+            hasFacts && (
+              <>
+                {data.period && (
+                  <div>
+                    <dt>When</dt>
+                    <dd>{data.period}</dd>
+                  </div>
+                )}
+                {data.teamSize && (
+                  <div>
+                    <dt>Team</dt>
+                    <dd>{data.teamSize}</dd>
+                  </div>
+                )}
+                {data.status && (
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{data.status}</dd>
+                  </div>
+                )}
+              </>
+            )
+          }
+        </dl>
+        <div class="case__toc">
+          <TableOfContents headings={headings} min={3} label="In this case study" />
+        </div>
+      </aside>
+
+      <div class="case__content">
+        <section class="summary" aria-label="Summary">
+          <p class="lead">{data.summary}</p>
+        </section>
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        {
+          data.outcomes && data.outcomes.length > 0 && (
+            <section class="outcomes" aria-labelledby="outcomes-title">
+              <h2 id="outcomes-title">Outcomes</h2>
+              <ul>
+                {data.outcomes.map((o) => (
+                  <li>{o}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
+          data.gallery.length > 0 && (
+            <section class="gallery" aria-labelledby="gallery-title">
+              <h2 id="gallery-title">Evidence</h2>
+              <ul class="gallery__grid">
+                {data.gallery.map((item) => (
+                  <li>
+                    <figure>
+                      <a href={item.src} data-lightbox data-caption={item.caption ?? ''} class="gallery__link" aria-label={`Zoom: ${item.alt}`}>
+                        <img src={item.src} alt={item.alt} width={item.width} height={item.height} loading="lazy" decoding="async" />
+                        <span class="gallery__zoom" aria-hidden="true">
+                          <Icon name="zoom" size={16} />
+                        </span>
+                      </a>
+                      {item.caption && <figcaption>{item.caption}</figcaption>}
+                    </figure>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </div>
+    </div>
+
+    <footer class="case__foot">
+      <div class="container case__foot-inner">
+        <a href="/projects" class="textlink">
+          <Icon name="arrow-left" size={16} class="arrow" /> Back to Projects
+        </a>
+        {
+          hasNext && (
+            <a href={`/projects/${next.id}`} class="next">
+              <span class="eyebrow eyebrow--plain">Next project</span>
+              <span class="next__title">
+                {next.data.title} <Icon name="arrow-right" size={20} class="arrow" />
+              </span>
+            </a>
+          )
+        }
+      </div>
+    </footer>
+  </article>
+  <Lightbox />
+  <script>
+    import '../../scripts/prose-enhance';
+  </script>
+</BaseLayout>
+
+<style>
+  .case__head {
+    padding-block: clamp(2.5rem, 6vh, 4.5rem) clamp(2rem, 4vh, 3rem);
+  }
+
+  .back {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .back .arrow {
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .back:hover .arrow {
+    transform: translateX(-3px);
+  }
+
+  .case__eyebrow {
+    display: flex;
+    margin-top: var(--space-6);
+  }
+
+  .case__title {
+    margin-top: var(--space-3);
+    font-size: clamp(2.5rem, 1.6rem + 4vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+  }
+
+  .case__tagline {
+    margin-top: var(--space-4);
+    max-width: 52ch;
+    font-size: var(--text-lg);
+    color: var(--text-muted);
+  }
+
+  .case__tags {
+    margin-top: var(--space-5);
+  }
+
+  .case__actions {
+    margin-top: var(--space-5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .case__cover {
+    max-width: var(--content-width);
+  }
+
+  .case__body {
+    display: grid;
+    gap: var(--space-7);
+    padding-block: clamp(3rem, 6vw, 5rem);
+  }
+
+  @media (min-width: 960px) {
+    .case__body {
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: var(--space-9);
+      align-items: start;
+    }
+    .case__aside {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+
+  .overview {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    font-size: var(--text-sm);
+  }
+
+  .overview dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--text-faint);
+    margin-bottom: var(--space-1);
+  }
+
+  .overview dd {
+    color: var(--text);
+  }
+
+  .case__toc {
+    margin-top: var(--space-6);
+  }
+
+  @media (max-width: 959px) {
+    .case__toc {
+      display: none;
+    }
+  }
+
+  .case__content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    max-width: var(--prose-width);
+  }
+
+  .outcomes h2,
+  .gallery h2 {
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    margin-bottom: var(--space-4);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .outcomes ul {
+    padding-left: 1.3em;
+    color: var(--text-muted);
+  }
+
+  .gallery__grid {
+    list-style: none;
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .gallery__link {
+    position: relative;
+    display: block;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .gallery__zoom {
+    position: absolute;
+    right: var(--space-3);
+    bottom: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+  }
+
+  .gallery figcaption {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+  }
+
+  .case__foot {
+    border-top: 1px solid var(--border);
+    padding-block: var(--space-7);
+  }
+
+  .case__foot-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+
+  .next {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    text-decoration: none;
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .next__title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .next__title .arrow {
+    color: var(--accent);
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .next:hover .next__title {
+    color: var(--accent);
+  }
+
+  .next:hover .arrow {
+    transform: translateX(4px);
+  }
+</style>

@@ -1,0 +1,128 @@
+---
+/**
+ * Copies `value` to the clipboard with visible success feedback.
+ * If the clipboard API fails, the value is shown in a selectable field.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  value: string;
+  label: string;
+  successLabel?: string;
+  class?: string;
+  variant?: 'btn' | 'icon';
+  /** Copy the live `location.href` instead of `value` (keeps preview/dev URLs accurate). */
+  useLocation?: boolean;
+}
+
+const { value, label, successLabel = 'Copied', class: className, variant = 'btn', useLocation = false } = Astro.props;
+---
+
+<span class:list={['copy', className]} data-copy>
+  <button
+    type="button"
+    class:list={[variant === 'btn' ? 'btn btn--ghost btn--sm' : 'copy__icon']}
+    data-copy-btn
+    data-value={value}
+    data-use-location={useLocation ? 'true' : undefined}
+    data-label={label}
+    data-success={successLabel}
+    aria-label={label}
+  >
+    <Icon name="copy" size={16} class="copy__ico copy__ico--idle" />
+    <Icon name="check" size={16} class="copy__ico copy__ico--done" />
+    {variant === 'btn' && <span data-copy-text>{label}</span>}
+  </button>
+  <span class="visually-hidden" role="status" aria-live="polite" data-copy-status></span>
+  <input class="copy__fallback" type="text" readonly value={value} hidden data-copy-fallback aria-label="Value to copy" />
+</span>
+
+<style>
+  .copy {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    position: relative;
+  }
+
+  .copy__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
+  }
+
+  .copy__icon:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .copy__ico--done {
+    display: none;
+  }
+
+  .copy.is-done .copy__ico--idle {
+    display: none;
+  }
+
+  .copy.is-done .copy__ico--done {
+    display: inline-block;
+    color: var(--accent);
+  }
+
+  .copy.is-done .btn {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .copy__fallback {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 0.6rem;
+    max-width: 100%;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-copy]').forEach((root) => {
+    const btn = root.querySelector<HTMLButtonElement>('[data-copy-btn]')!;
+    const text = root.querySelector<HTMLElement>('[data-copy-text]');
+    const status = root.querySelector<HTMLElement>('[data-copy-status]')!;
+    const fallback = root.querySelector<HTMLInputElement>('[data-copy-fallback]')!;
+    let timer: number | undefined;
+
+    btn.addEventListener('click', async () => {
+      const value = btn.dataset.useLocation ? window.location.href : (btn.dataset.value ?? '');
+      fallback.value = value;
+      try {
+        await navigator.clipboard.writeText(value);
+        root.classList.add('is-done');
+        if (text) text.textContent = btn.dataset.success ?? 'Copied';
+        status.textContent = `${btn.dataset.success ?? 'Copied'}: ${value}`;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          root.classList.remove('is-done');
+          if (text) text.textContent = btn.dataset.label ?? '';
+          status.textContent = '';
+        }, 2000);
+      } catch {
+        fallback.hidden = false;
+        fallback.focus();
+        fallback.select();
+        status.textContent = 'Copy failed. The value is selected below.';
+      }
+    });
+  });
+</script>

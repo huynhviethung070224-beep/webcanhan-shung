@@ -1,0 +1,100 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  /** Minimum heading count before the TOC renders. */
+  min?: number;
+  label?: string;
+}
+
+const { headings, min = 3, label = 'On this page' } = Astro.props;
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  items.length >= min && (
+    <nav class="toc" aria-label={label} data-toc>
+      <p class="toc__label eyebrow eyebrow--plain">{label}</p>
+      <ol class="toc__list">
+        {items.map((h) => (
+          <li class:list={['toc__item', `toc__item--d${h.depth}`]}>
+            <a href={`#${h.slug}`} class="toc__link" data-toc-link={h.slug}>
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<style>
+  .toc {
+    font-size: var(--text-sm);
+  }
+
+  .toc__label {
+    margin-bottom: var(--space-3);
+  }
+
+  .toc__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border);
+  }
+
+  .toc__item--d3 .toc__link {
+    padding-left: calc(var(--space-4) + var(--space-3));
+    font-size: var(--text-xs);
+  }
+
+  .toc__link {
+    display: block;
+    padding: 0.4rem 0 0.4rem var(--space-4);
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
+  }
+
+  .toc__link:hover {
+    color: var(--text);
+  }
+
+  .toc__link.is-active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+</style>
+
+<script>
+  const toc = document.querySelector<HTMLElement>('[data-toc]');
+  if (toc) {
+    const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+    const targets = links
+      .map((l) => document.getElementById(l.dataset.tocLink ?? ''))
+      .filter((el): el is HTMLElement => Boolean(el));
+
+    const setActive = (id: string) => {
+      links.forEach((l) => l.classList.toggle('is-active', l.dataset.tocLink === id));
+    };
+
+    if (targets.length && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible[0]) setActive(visible[0].target.id);
+        },
+        { rootMargin: '-20% 0px -65% 0px', threshold: [0, 1] },
+      );
+      targets.forEach((t) => io.observe(t));
+    }
+  }
+</script>

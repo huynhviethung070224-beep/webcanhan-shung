@@ -1,0 +1,244 @@
+/* Long-form reading styles for Markdown output */
+.prose {
+  max-width: var(--prose-width);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--text);
+}
+
+.prose > * + * {
+  margin-top: 1.25em;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  color: var(--text);
+}
+
+.prose h2 {
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  margin-top: 2.4em;
+  padding-top: 1.2em;
+  border-top: 1px solid var(--border);
+}
+
+.prose h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.prose h3 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin-top: 2em;
+}
+
+.prose h4 {
+  font-size: var(--text-lg);
+  margin-top: 1.6em;
+}
+
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+  margin-top: 0.8em;
+}
+
+.prose p {
+  color: var(--text-muted);
+}
+
+.prose li,
+.prose td,
+.prose th,
+.prose blockquote {
+  color: var(--text-muted);
+}
+
+.prose strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.prose a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-line);
+}
+
+.prose a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose li + li {
+  margin-top: 0.4em;
+}
+
+.prose li::marker {
+  color: var(--accent);
+}
+
+.prose blockquote {
+  border-left: 2px solid var(--accent);
+  padding: 0.25em 0 0.25em 1.25em;
+  font-style: italic;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin-block: 2.5em;
+}
+
+.prose code:not(pre code) {
+  padding: 0.1em 0.4em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.86em;
+}
+
+/* Code blocks (Shiki output: <pre class="astro-code" data-language="…">) */
+.prose pre {
+  position: relative;
+  margin: 1.5em 0 0;
+  padding: 2rem 0 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  background: var(--bg-sunken) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  tab-size: 2;
+}
+
+.prose pre::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  padding: 0 0.9rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+/* The <code> is the horizontal scroll container, so the label and copy button stay in place. */
+.prose pre code {
+  display: block;
+  overflow-x: auto;
+  padding: 1rem 1.1rem;
+  background: none;
+  border: 0;
+  font-size: inherit;
+  scrollbar-width: thin;
+}
+
+.prose .code-copy {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 1.5rem;
+  padding: 0 0.55rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  transition:
+    color var(--dur-hover) var(--ease-out),
+    border-color var(--dur-hover) var(--ease-out);
+}
+
+.prose .code-copy:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.prose .code-copy.is-done {
+  color: var(--accent);
+}
+
+/* Tables */
+.prose .table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.prose table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.prose th {
+  color: var(--text);
+  font-weight: 600;
+  background: var(--surface);
+}
+
+.prose tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Figures: image followed by an italic caption */
+.prose img {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.prose p:has(> img:first-child) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  margin-top: 1.6em;
+}
+
+.prose p:has(> img:first-child) em {
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  font-style: normal;
+}
+
+.prose figure {
+  margin-top: 1.6em;
+}
+
+.prose figcaption {
+  margin-top: 0.6em;
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}

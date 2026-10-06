@@ -1,0 +1,107 @@
+/* Midnight design tokens */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces & text */
+  --bg: #111411;
+  --bg-elevated: #161a16;
+  --bg-sunken: #0c0e0c;
+  --surface: #181c18;
+  --surface-hover: #1d221d;
+  --text: #f4f6ed;
+  --text-muted: #b0b5b0;
+  --text-faint: #8f958f; /* ≥4.5:1 on charcoal surfaces for small labels */
+  --border: #2b2f2b;
+  --border-strong: #3a403a;
+  --accent: #d5f78b;
+  --accent-ink: #111411;
+  --accent-soft: rgba(213, 247, 139, 0.12);
+  --accent-line: rgba(213, 247, 139, 0.35);
+  --focus: var(--accent);
+
+  /* Typography */
+  --font-sans: 'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Instrument Serif', 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem; /* 17px */
+  --text-lg: 1.1875rem;
+  --text-xl: 1.375rem;
+  --text-2xl: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  --text-3xl: clamp(2rem, 1.5rem + 2.4vw, 3.25rem);
+  --text-display: clamp(2.75rem, 1.4rem + 6.4vw, 6.5rem); /* 44px -> 104px */
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.2;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.7;
+  --tracking-tight: -0.03em;
+  --tracking-label: 0.08em;
+
+  /* Layout */
+  --content-width: 1120px;
+  --prose-width: 42rem; /* ~65ch at 17px */
+  --gutter: 20px;
+  --header-height: 72px;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+  --section-gap: clamp(4rem, 3rem + 5vw, 8rem);
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --control-height: 44px;
+  --control-height-sm: 36px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-hover: 150ms;
+  --dur-route: 200ms;
+  --dur-reveal: 400ms;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 48px;
+    --header-height: 80px;
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --gutter: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-hover: 0ms;
+    --dur-route: 0ms;
+    --dur-reveal: 0ms;
+  }
+}

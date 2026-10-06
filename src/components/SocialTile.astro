@@ -1,0 +1,116 @@
+---
+import type { SocialLink } from '../config/social';
+import Icon from './Icon.astro';
+
+interface Props {
+  link: SocialLink;
+}
+
+const { link } = Astro.props;
+---
+
+<a
+  href={link.url}
+  class:list={['tile', { 'tile--featured': link.featured }]}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={`${link.label}${link.handle ? ` — ${link.handle}` : ''} (opens in a new tab)`}
+>
+  <span class="tile__icon">
+    <Icon name={link.icon} size={22} />
+  </span>
+  <span class="tile__text">
+    <span class="tile__label">{link.label}</span>
+    {link.handle && <span class="tile__handle mono">{link.handle}</span>}
+  </span>
+  <Icon name="arrow-up-right" size={18} class="tile__ext" />
+</a>
+
+<style>
+  .tile {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 76px;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    color: var(--text);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-hover) var(--ease-out),
+      background var(--dur-hover) var(--ease-out),
+      transform var(--dur-hover) var(--ease-out);
+  }
+
+  .tile:hover,
+  .tile:focus-visible {
+    border-color: var(--accent);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+  }
+
+  .tile:focus-visible {
+    outline-offset: 4px;
+  }
+
+  .tile--featured {
+    background:
+      radial-gradient(90% 100% at 100% 0%, rgba(213, 247, 139, 0.1), transparent 55%),
+      var(--bg-elevated);
+  }
+
+  .tile__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    color: var(--text);
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
+  }
+
+  .tile:hover .tile__icon,
+  .tile:focus-visible .tile__icon {
+    color: var(--accent);
+    border-color: var(--accent-line);
+  }
+
+  .tile__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .tile__label {
+    font-weight: 600;
+  }
+
+  .tile__handle {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tile__ext {
+    color: var(--text-faint);
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      transform var(--dur-hover) var(--ease-out);
+  }
+
+  .tile:hover .tile__ext,
+  .tile:focus-visible .tile__ext {
+    color: var(--accent);
+    transform: translate(2px, -2px);
+  }
+</style>

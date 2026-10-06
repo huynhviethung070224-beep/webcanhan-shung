@@ -1,0 +1,194 @@
+---
+/**
+ * Project cover. Renders a real screenshot when `image` is supplied; otherwise
+ * a clearly illustrative, title-based composition tied to the project type:
+ * - "orbit": route nodes orbiting a marker (DragonGo)
+ * - "schema": six connected table blocks (Library Management System)
+ */
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  variant: 'orbit' | 'schema';
+  title: string;
+  alt: string;
+  image?: { src: string | ImageMetadata; alt: string; width: number; height: number };
+  /** "card" for grid previews, "hero" for case-study heads. */
+  size?: 'card' | 'hero';
+  loading?: 'lazy' | 'eager';
+}
+
+const { variant, title, alt, image, size = 'card', loading = 'lazy' } = Astro.props;
+const src = typeof image?.src === 'string' ? image?.src : image?.src.src;
+---
+
+<div class:list={['cover', `cover--${variant}`, `cover--${size}`]} role="img" aria-label={alt}>
+  {
+    image && src ? (
+      <img
+        src={src}
+        alt=""
+        width={image.width}
+        height={image.height}
+        loading={loading}
+        decoding="async"
+        class="cover__img"
+      />
+    ) : variant === 'orbit' ? (
+      <svg viewBox="0 0 640 400" class="cover__art" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern id={`grid-${size}`} width="32" height="32" patternUnits="userSpaceOnUse">
+            <path d="M32 0H0V32" fill="none" stroke="#2B2F2B" stroke-width="0.6" />
+          </pattern>
+        </defs>
+        <rect width="640" height="400" fill={`url(#grid-${size})`} />
+        <g stroke="#3A403A" fill="none" stroke-width="1">
+          <circle cx="400" cy="210" r="150" />
+          <circle cx="400" cy="210" r="95" />
+          <circle cx="400" cy="210" r="150" stroke="#D5F78B" stroke-opacity="0.45" stroke-dasharray="3 10" />
+        </g>
+        <g stroke="#D5F78B" stroke-opacity="0.6" stroke-width="1.2" fill="none">
+          <path d="M250 210 Q 300 110 400 115 T 550 210" />
+          <path d="M400 115 L 330 260 L 470 300" />
+        </g>
+        <g fill="#D5F78B">
+          <circle cx="250" cy="210" r="5" />
+          <circle cx="400" cy="115" r="6" />
+          <circle cx="550" cy="210" r="4" />
+          <circle cx="330" cy="260" r="4" />
+          <circle cx="470" cy="300" r="5" />
+        </g>
+        <g fill="#F4F6ED">
+          <circle cx="400" cy="210" r="3" />
+        </g>
+        <g font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#B0B5B0" letter-spacing="1">
+          <text x="262" y="200">A</text>
+          <text x="412" y="110">B</text>
+          <text x="560" y="200">C</text>
+          <text x="340" y="282">D</text>
+          <text x="480" y="320">E</text>
+        </g>
+      </svg>
+    ) : (
+      <svg viewBox="0 0 640 400" class="cover__art" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid slice">
+        <g stroke="#D5F78B" stroke-opacity="0.5" stroke-width="1.2" fill="none">
+          <path d="M226 110 H 300 V 170" />
+          <path d="M300 170 H 414 V 110" />
+          <path d="M300 170 V 240" />
+          <path d="M226 290 H 300 V 240" />
+          <path d="M300 240 H 414 V 290" />
+          <path d="M500 200 H 414" />
+        </g>
+        <g fill="#181C18" stroke="#3A403A">
+          <rect x="130" y="80" width="96" height="60" rx="6" />
+          <rect x="414" y="80" width="96" height="60" rx="6" />
+          <rect x="130" y="260" width="96" height="60" rx="6" />
+          <rect x="414" y="260" width="96" height="60" rx="6" />
+          <rect x="252" y="170" width="96" height="60" rx="6" stroke="#D5F78B" />
+          <rect x="500" y="170" width="96" height="60" rx="6" />
+        </g>
+        <g stroke="#2B2F2B">
+          <path d="M130 98 H 226 M414 98 H 510 M130 278 H 226 M414 278 H 510 M252 188 H 348 M500 188 H 596" />
+        </g>
+        <g fill="#D5F78B">
+          <circle cx="300" cy="170" r="3.5" />
+          <circle cx="300" cy="240" r="3.5" />
+          <circle cx="414" cy="200" r="3.5" />
+        </g>
+        <g font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#B0B5B0" letter-spacing="1.2">
+          <text x="140" y="92">TABLE 01</text>
+          <text x="424" y="92">TABLE 02</text>
+          <text x="140" y="272">TABLE 03</text>
+          <text x="424" y="272">TABLE 04</text>
+          <text x="262" y="182" fill="#D5F78B">TABLE 05</text>
+          <text x="510" y="182">TABLE 06</text>
+        </g>
+        <g fill="#7D827D">
+          <rect x="140" y="108" width="52" height="4" rx="2" />
+          <rect x="140" y="118" width="40" height="4" rx="2" />
+          <rect x="424" y="108" width="60" height="4" rx="2" />
+          <rect x="424" y="118" width="36" height="4" rx="2" />
+          <rect x="140" y="288" width="48" height="4" rx="2" />
+          <rect x="140" y="298" width="56" height="4" rx="2" />
+          <rect x="424" y="288" width="44" height="4" rx="2" />
+          <rect x="424" y="298" width="62" height="4" rx="2" />
+          <rect x="262" y="198" width="58" height="4" rx="2" />
+          <rect x="262" y="208" width="42" height="4" rx="2" />
+          <rect x="510" y="198" width="50" height="4" rx="2" />
+          <rect x="510" y="208" width="38" height="4" rx="2" />
+        </g>
+      </svg>
+    )
+  }
+  {
+    !image && (
+      <div class="cover__label">
+        <span class="cover__title">{title}</span>
+        <span class="cover__note mono">Illustrative cover</span>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .cover {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(120% 90% at 85% 10%, rgba(213, 247, 139, 0.08), transparent 60%),
+      linear-gradient(160deg, #181c18 0%, #111411 100%);
+  }
+
+  .cover--hero {
+    aspect-ratio: 16 / 9;
+  }
+
+  .cover__img,
+  .cover__art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cover__label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: linear-gradient(to top, rgba(17, 20, 17, 0.9), transparent);
+  }
+
+  .cover__title {
+    font-weight: 600;
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .cover--hero .cover__title {
+    font-size: var(--text-2xl);
+  }
+
+  .cover__note {
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Schema variant leans cooler/flatter */
+  .cover--schema {
+    background:
+      linear-gradient(180deg, rgba(43, 47, 43, 0.35) 1px, transparent 1px) 0 0 / 100% 28px,
+      linear-gradient(160deg, #151915 0%, #111411 100%);
+  }
+</style>
