@@ -24,6 +24,8 @@ const projects = defineCollection({
     coverImage: z
       .object({ src: z.string(), alt: z.string(), width: z.number(), height: z.number() })
       .optional(),
+    /** How the cover image sits in the frame. Diagrams and logos use contain. */
+    coverFit: z.enum(['cover', 'contain']).default('cover'),
     demoUrl: z.url().optional(),
     repoUrl: z.url().optional(),
     /** Compact factual overview shown at the top of the case study. */

@@ -9,10 +9,21 @@ technologies:
   - Supabase
   - PostgreSQL
 cover: orbit
-coverAlt: Illustrative cover for Badminton FairPlay Queue.
+coverAlt: Screenshot of Badminton FairPlay Queue showing three courts at the Drexel Badminton Club.
+coverImage:
+  src: /projects/badminton-fairplay-queue/court-desktop.png
+  alt: Desktop screenshot of Badminton FairPlay Queue. Club night is closed and three courts are marked available.
+  width: 1280
+  height: 900
 purpose: Run a fair waiting list and three courts for a small badminton club.
 demoUrl: https://badminton.drexel-queue.workers.dev/
 repoUrl: https://github.com/huynhviethung070224-beep/queue-
+gallery:
+  - src: /projects/badminton-fairplay-queue/court-mobile.png
+    alt: Phone screenshot of Badminton FairPlay Queue with the queue closed and three courts available.
+    caption: The same court view on a phone, from the project’s own interface tests.
+    width: 320
+    height: 900
 order: 3
 featured: false
 ---

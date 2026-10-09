@@ -7,9 +7,21 @@ technologies:
   - PostgreSQL
   - SQL
 cover: schema
-coverAlt: Illustrative cover for the Library Management System showing six connected table blocks.
+coverAlt: Entity diagram of the six library tables and their relationships.
+coverFit: contain
+coverImage:
+  src: /projects/library-management-system/erd.png
+  alt: Entity diagram showing branch, employees, members, books, issued_status, and return_status.
+  width: 2254
+  height: 1716
 purpose: Manage books, members, branches, and borrowing records for a library with several branches.
 repoUrl: https://github.com/huynhviethung070224-beep/SQL_Library_Management_P2
+gallery:
+  - src: /projects/library-management-system/erd.png
+    alt: Entity diagram showing branch, employees, members, books, issued_status, and return_status.
+    caption: The six tables and how they connect. Branch employs staff, members and books meet in issued_status, and returns point back to an issue.
+    width: 2254
+    height: 1716
 order: 2
 featured: true
 ---

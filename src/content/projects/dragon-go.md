@@ -8,7 +8,13 @@ technologies:
   - Firebase Authentication
   - Cloud Firestore
 cover: orbit
-coverAlt: Illustrative cover for DragonGo showing connected route nodes orbiting a campus marker.
+coverAlt: DragonGo logo, with a map pin in place of the letter O.
+coverFit: contain
+coverImage:
+  src: /projects/dragon-go/logo.png
+  alt: DragonGo wordmark. The letter O is a map pin.
+  width: 1063
+  height: 309
 purpose: Help students move around campus with route planning that understands their schedule.
 order: 1
 featured: true
