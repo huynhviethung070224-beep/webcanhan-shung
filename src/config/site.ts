@@ -38,12 +38,7 @@ export const site = {
   cvPath: null as string | null,
 
   /** Owner-supplied portrait (inside `public/`). `null` uses the typographic composition. */
-  portrait: {
-    src: '/about/portrait.jpg',
-    alt: 'Portrait of Huynh Viet Hung (Ian).',
-    width: 460,
-    height: 460,
-  },
+  portrait: null as { src: string; alt: string; width: number; height: number } | null,
 
   /** Safe background facts used on About and Portfolio. */
   facts: {
