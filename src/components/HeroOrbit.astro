@@ -56,7 +56,8 @@
     right: -10%;
     width: min(92vw, 820px);
     height: min(92vw, 820px);
-    transform: translateY(-50%);
+    transform: translate3d(var(--px, 0px), calc(-50% + var(--py, 0px)), 0);
+    transition: transform 180ms var(--ease-out);
     pointer-events: none;
     z-index: 0;
     opacity: 0.9;
@@ -104,3 +105,23 @@
     }
   }
 </style>
+
+<script>
+  const orbit = document.querySelector<HTMLElement>('.hero-orbit');
+  const hero = orbit?.closest('.hero');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (orbit && hero && !reduce) {
+    hero.addEventListener('pointermove', (event) => {
+      const point = event as PointerEvent;
+      const box = hero.getBoundingClientRect();
+      const x = ((point.clientX - box.left) / box.width - 0.5) * 24;
+      const y = ((point.clientY - box.top) / box.height - 0.5) * 24;
+      orbit.style.setProperty('--px', `${x.toFixed(1)}px`);
+      orbit.style.setProperty('--py', `${y.toFixed(1)}px`);
+    });
+    hero.addEventListener('pointerleave', () => {
+      orbit.style.setProperty('--px', '0px');
+      orbit.style.setProperty('--py', '0px');
+    });
+  }
+</script>

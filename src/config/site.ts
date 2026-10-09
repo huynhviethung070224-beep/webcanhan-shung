@@ -15,6 +15,8 @@ export const site = {
     return `${this.fullName} (${this.nickname})`;
   },
   tagline: 'Honors Data Science student at Drexel University',
+  /** One factual line under the home name. No extra slogan. */
+  statusLine: 'Software & Data Engineering Co-op, TPCOMS · Drexel University',
   /** Approved introduction. Preserve this wording verbatim. */
   intro:
     'Hi, I’m Huynh Viet Hung (Ian), a Data Science student at Drexel University interested in data, software development, and AI. I turn ideas into working applications and explore how technology can solve practical problems. Through my projects and internship experience, I’m building technical skills alongside an understanding of how businesses work.',

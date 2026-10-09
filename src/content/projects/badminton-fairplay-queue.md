@@ -10,6 +10,8 @@ technologies:
   - PostgreSQL
 cover: orbit
 coverAlt: Screenshot of Badminton FairPlay Queue showing three courts at the Drexel Badminton Club.
+coverFrame: browser
+coverFit: contain
 coverImage:
   src: /projects/badminton-fairplay-queue/court-desktop.png
   alt: Desktop screenshot of Badminton FairPlay Queue. Club night is closed and three courts are marked available.
@@ -24,6 +26,7 @@ gallery:
     caption: The same court view on a phone, from the project’s own interface tests.
     width: 320
     height: 900
+    frame: browser
 order: 3
 featured: false
 ---

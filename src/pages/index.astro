@@ -20,6 +20,7 @@ const latest = posts[0];
         <span class="hero__name">{site.fullName}</span>
         <span class="hero__nick serif">({site.nickname})</span>
       </h1>
+      <p class="hero__status">{site.statusLine}</p>
       <p class="hero__intro">{site.intro}</p>
       <div class="hero__actions">
         <a href="/projects" class="btn btn--primary">
@@ -163,6 +164,14 @@ const latest = posts[0];
     white-space: nowrap;
   }
 
+  .hero__status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
   .hero__intro {
     max-width: 62ch;
     font-size: var(--text-lg);
@@ -181,6 +190,7 @@ const latest = posts[0];
   @media (prefers-reduced-motion: no-preference) {
     .hero__eyebrow,
     .hero__title,
+    .hero__status,
     .hero__intro,
     .hero__actions {
       animation: rise 600ms var(--ease-out) both;

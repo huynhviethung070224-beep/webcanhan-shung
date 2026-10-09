@@ -17,24 +17,48 @@ interface Props {
   loading?: 'lazy' | 'eager';
   /** Contain keeps diagrams and logos fully visible. Cover is for UI screenshots. */
   fit?: 'cover' | 'contain';
+  /** Browser chrome around a product screenshot. Diagrams and logos stay plain. */
+  frame?: 'browser' | 'plain';
 }
 
-const { variant, title, alt, image, size = 'card', loading = 'lazy', fit = 'cover' } = Astro.props;
+const { variant, title, alt, image, size = 'card', loading = 'lazy', fit = 'cover', frame = 'plain' } = Astro.props;
 const src = typeof image?.src === 'string' ? image?.src : image?.src.src;
 ---
 
-<div class:list={['cover', `cover--${variant}`, `cover--${size}`]} role="img" aria-label={alt}>
+<div class:list={['cover', `cover--${variant}`, `cover--${size}`, { 'cover--browser': frame === 'browser' }]} role="img" aria-label={alt}>
   {
     image && src ? (
-      <img
-        src={src}
-        alt=""
-        width={image.width}
-        height={image.height}
-        loading={loading}
-        decoding="async"
-        class:list={['cover__img', { 'cover__img--contain': fit === 'contain' }]}
-      />
+      frame === 'browser' ? (
+        <div class="browser">
+          <div class="browser__bar">
+            <span class="browser__dots" aria-hidden="true">
+              <i></i><i></i><i></i>
+            </span>
+            <span class="browser__name">{title}</span>
+          </div>
+          <div class="browser__view">
+            <img
+              src={src}
+              alt=""
+              width={image.width}
+              height={image.height}
+              loading={loading}
+              decoding="async"
+              class:list={['cover__img', { 'cover__img--contain': fit === 'contain' }]}
+            />
+          </div>
+        </div>
+      ) : (
+        <img
+          src={src}
+          alt=""
+          width={image.width}
+          height={image.height}
+          loading={loading}
+          decoding="async"
+          class:list={['cover__img', { 'cover__img--contain': fit === 'contain' }]}
+        />
+      )
     ) : variant === 'orbit' ? (
       <svg viewBox="0 0 640 400" class="cover__art" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid slice">
         <defs>
@@ -159,6 +183,71 @@ const src = typeof image?.src === 'string' ? image?.src : image?.src.src;
   .cover__img--contain {
     object-fit: contain;
     background: #0e100e;
+  }
+
+  .cover__img {
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .cover:hover .cover__img {
+    transform: scale(1.02);
+  }
+
+  .cover--browser {
+    background: #0c0e0c;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .browser {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .browser__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    height: 36px;
+    padding: 0 0.85rem;
+    border-bottom: 1px solid var(--border);
+    flex: none;
+  }
+
+  .browser__dots {
+    display: inline-flex;
+    gap: 5px;
+  }
+
+  .browser__dots i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    display: block;
+  }
+
+  .browser__name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .browser__view {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .browser__view .cover__img {
+    object-fit: contain;
+    background: #101210;
   }
 
   .cover__label {

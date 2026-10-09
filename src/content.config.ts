@@ -26,6 +26,10 @@ const projects = defineCollection({
       .optional(),
     /** How the cover image sits in the frame. Diagrams and logos use contain. */
     coverFit: z.enum(['cover', 'contain']).default('cover'),
+    /** Browser chrome for product screenshots. Diagrams and logos stay plain. */
+    coverFrame: z.enum(['browser', 'plain']).default('plain'),
+    /** Smaller treatment on the projects index (earlier practice, not a main case study). */
+    earlier: z.boolean().default(false),
     demoUrl: z.url().optional(),
     repoUrl: z.url().optional(),
     /** Compact factual overview shown at the top of the case study. */
@@ -44,6 +48,7 @@ const projects = defineCollection({
           caption: z.string().optional(),
           width: z.number(),
           height: z.number(),
+          frame: z.enum(['browser', 'plain']).default('plain'),
         }),
       )
       .default([]),

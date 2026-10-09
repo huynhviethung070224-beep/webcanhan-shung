@@ -7,14 +7,14 @@ What the site still needs from the owner, where it goes, and what the site shows
 | Input | State | Where to add it | Current fallback |
 | --- | --- | --- | --- |
 | Name, introduction, two project descriptions, roles, technologies, five social URLs | Supplied, used verbatim | `src/config/site.ts`, `src/content/projects/*.md`, `src/config/social.ts` | — |
-| Custom domain `ianhuynh.me` | Selected; registration and hosting connection unconfirmed | `productionOrigin` in `src/config/site.ts`; `PUBLIC_SITE_ORIGIN` env for previews/temporary hosts | Metadata uses the planned origin; preview deployments use their own URL |
+| Custom domain `ianhuynh.me` | Not connected. Leave `PUBLIC_SITE_ORIGIN` on the Vercel URL until a CV is attached and the domain is actually registered. | `productionOrigin` in `src/config/site.ts` | Live site stays on the Vercel URL |
 | Approved CV (PDF) | Not supplied | `public/cv/<file>.pdf` + `cvPath` in `src/config/site.ts` | Portfolio shows "See the projects" / "Get in touch" instead of Download CV |
 | Preferred public contact email | `huynhviethung070224@gmail.com`, from the LinkedIn PDF contact line | `contactEmail` in `src/config/site.ts` | Contact page shows a mailto and copy action |
 | Portrait / personal photos | Removed at the owner's request | `portrait` in `src/config/site.ts` | About uses the typographic monogram |
 | Education dates, program details | LinkedIn PDF: Drexel CCI, Bachelor’s in Data Science, Sep 2025–Jun 2030; ISHCMC American Academy high school diploma, Sep 2022–Jun 2025. Headline also says Honors. | `education[]` in `src/config/site.ts` | Shown on About and Portfolio |
 | Internship employer, role, dates | LinkedIn PDF: TPCOMS Software & Data Engineering Co-op, Ho Chi Minh City, Sep 2026–Present; Drexel VSA core team, Philadelphia, Oct 2025–Present. CodeFest is not on the PDF and was removed. | `experience[]` in `src/config/site.ts` | Shown on About and Portfolio |
 | Certificates / additional experience | LinkedIn PDF names two certificates and does not list issuers or dates | `certificates[]` in `src/config/portfolio.ts` | Titles only, no issuer line |
-| DragonGo screenshots | The local project has a logo only (`frontend/logo.png`). No screen recording or UI screenshot. | `coverImage` in `dragon-go.md` | The logo is the cover |
+| DragonGo screenshots | Six interface shots from the project README, plus the wordmark. No public demo URL. | `coverImage` and `gallery` in `dragon-go.md` | Home screen is the cover; the rest open in the case-study gallery |
 | DragonGo demo URL, repository URL | Not supplied | `demoUrl`, `repoUrl` in `dragon-go.md` | Live Demo / View Code buttons hidden |
 | DragonGo hackathon name, dates, team size, outcomes, technical decisions, lessons | Not supplied | `period`, `teamSize`, `status`, `outcomes` frontmatter; "Technical decisions" / "Lessons" sections in the body | Case study covers overview, contribution and how the pieces relate, from the approved text only |
 | Library Management System ERD / schema (six tables) | `DB setup.png` from the local library project folder. The stock `library.jpg` illustration was not used. | `coverImage` and `gallery` in `library-management-system.md` | ERD is the cover and can be zoomed |

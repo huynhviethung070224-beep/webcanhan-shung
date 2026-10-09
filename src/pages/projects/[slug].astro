@@ -57,7 +57,7 @@ const hasFacts = data.period || data.teamSize || data.status;
 
     <div class="container">
       <div class="case__cover">
-        <ProjectCover variant={data.cover} title={data.title} alt={data.coverAlt} image={data.coverImage} fit={data.coverFit} size="hero" loading="eager" />
+        <ProjectCover variant={data.cover} title={data.title} alt={data.coverAlt} image={data.coverImage} fit={data.coverFit} frame={data.coverFrame} size="hero" loading="eager" />
       </div>
     </div>
 
@@ -128,30 +128,45 @@ const hasFacts = data.period || data.teamSize || data.status;
           )
         }
 
-        {
-          data.gallery.length > 0 && (
-            <section class="gallery" aria-labelledby="gallery-title">
-              <h2 id="gallery-title">Evidence</h2>
-              <ul class="gallery__grid">
-                {data.gallery.map((item) => (
-                  <li>
-                    <figure>
-                      <a href={item.src} data-lightbox data-caption={item.caption ?? ''} class="gallery__link" aria-label={`Zoom: ${item.alt}`}>
-                        <img src={item.src} alt={item.alt} width={item.width} height={item.height} loading="lazy" decoding="async" />
-                        <span class="gallery__zoom" aria-hidden="true">
-                          <Icon name="zoom" size={16} />
-                        </span>
-                      </a>
-                      {item.caption && <figcaption>{item.caption}</figcaption>}
-                    </figure>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )
-        }
       </div>
     </div>
+
+    {
+      data.gallery.length > 0 && (
+        <div class="container">
+          <section class="gallery" aria-labelledby="gallery-title">
+            <h2 id="gallery-title">Evidence</h2>
+            <ul class="gallery__grid" data-gallery>
+              {data.gallery.map((item) => (
+                <li>
+                  <figure>
+                    <a
+                      href={item.src}
+                      data-lightbox
+                      data-caption={item.caption ?? ''}
+                      class:list={['gallery__link', { 'gallery__link--browser': item.frame === 'browser' }]}
+                      aria-label={`Zoom: ${item.alt}`}
+                    >
+                      {item.frame === 'browser' && (
+                        <span class="gallery__bar" aria-hidden="true">
+                          <span class="gallery__dots"></span>
+                          {data.title}
+                        </span>
+                      )}
+                      <img src={item.src} alt={item.alt} width={item.width} height={item.height} loading="lazy" decoding="async" />
+                      <span class="gallery__zoom" aria-hidden="true">
+                        <Icon name="zoom" size={16} />
+                      </span>
+                    </a>
+                    {item.caption && <figcaption>{item.caption}</figcaption>}
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      )
+    }
 
     <footer class="case__foot">
       <div class="container case__foot-inner">
@@ -174,6 +189,14 @@ const hasFacts = data.period || data.teamSize || data.status;
   <Lightbox />
   <script>
     import '../../scripts/prose-enhance';
+    document.querySelectorAll('[data-gallery]').forEach((gallery) => {
+      gallery.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+          gallery.querySelectorAll('a').forEach((other) => other.classList.remove('is-selected'));
+          link.classList.add('is-selected');
+        });
+      });
+    });
   </script>
 </BaseLayout>
 
@@ -302,18 +325,74 @@ const hasFacts = data.period || data.teamSize || data.status;
     color: var(--text-muted);
   }
 
+  .gallery {
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+  }
+
   .gallery__grid {
     list-style: none;
     display: grid;
     gap: var(--space-5);
   }
 
+  @media (min-width: 720px) {
+    .gallery__grid {
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(220px, 28%);
+      overflow-x: auto;
+      padding-bottom: var(--space-3);
+      scroll-snap-type: x mandatory;
+    }
+
+    .gallery__grid > li {
+      scroll-snap-align: start;
+    }
+  }
+
   .gallery__link {
     position: relative;
-    display: block;
+    display: flex;
+    flex-direction: column;
     border-radius: var(--radius-md);
     overflow: hidden;
     border: 1px solid var(--border);
+    background: #101210;
+    aspect-ratio: 16 / 11;
+  }
+
+  .gallery__link.is-selected {
+    border-color: var(--accent);
+  }
+
+  .gallery__link img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .gallery__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 28px;
+    padding: 0 0.7rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    flex: none;
+  }
+
+  .gallery__dots {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    box-shadow: 12px 0 0 var(--border-strong), 24px 0 0 var(--border-strong);
+    margin-right: 28px;
   }
 
   .gallery__zoom {

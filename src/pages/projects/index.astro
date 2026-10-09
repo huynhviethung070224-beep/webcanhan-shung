@@ -2,26 +2,29 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
+import Icon from '../../components/Icon.astro';
 import { getProjects } from '../../utils/content';
 
 const projects = await getProjects();
+const primary = projects.filter((project) => !project.data.earlier);
+const earlier = projects.filter((project) => project.data.earlier);
 const title = 'Projects';
 const description =
-  'Projects by Huynh Viet Hung (Ian): DragonGo, a campus navigation app with Firebase backend work, and a PostgreSQL Library Management System with a normalized six-table schema.';
+  'Projects by Huynh Viet Hung (Ian): DragonGo, a campus navigation app; a PostgreSQL library database; and Badminton FairPlay Queue.';
 ---
 
 <BaseLayout title={title} description={description} ogKey="projects">
   <PageHead
     eyebrow="Projects"
     title="Products and technical case studies."
-    lead="Each project opens its own case study: purpose, my role, the stack, and what I built. The collection starts with two."
+    lead="Three case studies with a role, a stack, and what I actually built. An earlier SQL exercise sits below them."
   />
 
   <section class="section">
     <div class="container">
       <ol class="list">
         {
-          projects.map((project, i) => (
+          primary.map((project, i) => (
             <li class="list__item reveal" style={`--reveal-delay:${i * 80}ms`}>
               <ProjectCard project={project} index={i} layout="feature" headingLevel="h2" loading={i === 0 ? 'eager' : 'lazy'} />
             </li>
@@ -30,6 +33,31 @@ const description =
       </ol>
     </div>
   </section>
+
+  {
+    earlier.length > 0 && (
+      <section class="section earlier" aria-labelledby="earlier-title">
+        <div class="container">
+          <p class="eyebrow">Earlier SQL practice</p>
+          <h2 id="earlier-title" class="earlier__title">Before the larger projects</h2>
+          <ul class="earlier__list">
+            {earlier.map((project) => (
+              <li>
+                <a href={`/projects/${project.id}`} class="earlier__link">
+                  <span class="earlier__name">
+                    {project.data.title}
+                    <Icon name="arrow-right" size={16} class="arrow" />
+                  </span>
+                  <span class="mono muted">{project.data.role}</span>
+                  <span class="earlier__tag muted">{project.data.tagline}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
 
 <style>
@@ -50,5 +78,62 @@ const description =
 
   .list__item:last-child {
     border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .earlier {
+    padding-top: 0;
+  }
+
+  .earlier__title {
+    margin-top: var(--space-3);
+    font-size: var(--text-xl);
+    font-weight: 500;
+  }
+
+  .earlier__list {
+    list-style: none;
+    margin-top: var(--space-5);
+    border-top: 1px solid var(--border);
+  }
+
+  .earlier__link {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+  }
+
+  @media (min-width: 720px) {
+    .earlier__link {
+      grid-template-columns: minmax(12rem, 18rem) 10rem 1fr;
+      gap: var(--space-5);
+      align-items: baseline;
+    }
+  }
+
+  .earlier__name {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+  }
+
+  .earlier__name .arrow {
+    color: var(--accent);
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .earlier__link:hover .earlier__name {
+    color: var(--accent);
+  }
+
+  .earlier__link:hover .arrow {
+    transform: translateX(3px);
+  }
+
+  .earlier__tag {
+    font-size: var(--text-sm);
   }
 </style>

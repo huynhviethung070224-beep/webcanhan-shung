@@ -12,6 +12,7 @@ purpose: Practice cleaning a sales table and answering straightforward business 
 repoUrl: https://github.com/huynhviethung070224-beep/sql_retail_sales_p1
 order: 5
 featured: false
+earlier: true
 ---
 
 ## Overview

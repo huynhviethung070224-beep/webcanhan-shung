@@ -22,7 +22,7 @@ const number = String(index + 1).padStart(2, '0');
 
 <article class:list={['card', `card--${layout}`, { 'card--flip': layout === 'feature' && index % 2 === 1 }]}>
   <a href={href} class="card__cover" aria-hidden="true" tabindex="-1">
-    <ProjectCover variant={data.cover} title={data.title} alt={data.coverAlt} image={data.coverImage} fit={data.coverFit} loading={loading} />
+    <ProjectCover variant={data.cover} title={data.title} alt={data.coverAlt} image={data.coverImage} fit={data.coverFit} frame={data.coverFrame} loading={loading} />
   </a>
   <div class="card__body">
     <p class="eyebrow eyebrow--plain">

@@ -92,6 +92,11 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
     backdrop-filter: saturate(140%) blur(12px);
     -webkit-backdrop-filter: saturate(140%) blur(12px);
     border-bottom: 1px solid var(--border);
+    transition: background var(--dur-hover) var(--ease-out);
+  }
+
+  .site-header.is-scrolled {
+    background: color-mix(in srgb, var(--bg) 97%, #000);
   }
 
   .site-header__inner {
@@ -362,6 +367,11 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
   }
 
   setupMenu();
+
+  const scrolledHeader = document.querySelector<HTMLElement>('[data-header]');
+  const onScroll = () => scrolledHeader?.classList.toggle('is-scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
   // Re-bind after bfcache restores.
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
