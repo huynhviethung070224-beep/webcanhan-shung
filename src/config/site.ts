@@ -14,7 +14,7 @@ export const site = {
   get displayName() {
     return `${this.fullName} (${this.nickname})`;
   },
-  tagline: 'Data Science student at Drexel University',
+  tagline: 'Honors Data Science student at Drexel University',
   /** Approved introduction. Preserve this wording verbatim. */
   intro:
     'Hi, I’m Huynh Viet Hung (Ian), a Data Science student at Drexel University interested in data, software development, and AI. I turn ideas into working applications and explore how technology can solve practical problems. Through my projects and internship experience, I’m building technical skills alongside an understanding of how businesses work.',
@@ -29,7 +29,7 @@ export const site = {
   productionOrigin: 'https://ianhuynh.me',
 
   /** Preferred public contact email. `null` hides every email action. */
-  contactEmail: null as string | null,
+  contactEmail: 'huynhviethung070224@gmail.com',
 
   /**
    * Path (inside `public/`) to the approved CV PDF, e.g. '/cv/huynh-viet-hung-cv.pdf'.
@@ -53,36 +53,35 @@ export const site = {
     interests: ['data', 'software development', 'AI'],
     hobbies: ['badminton', 'golf', 'basketball'],
     internship: 'Software & Data Engineering Co-op at TPCOMS',
+    linkedInSkills: ['Vibe Coding', 'Relational Databases', 'Jupyter'],
   },
 
-  /** Education timeline. Dates come from the public LinkedIn profile. */
+  /** Education timeline. Dates and schools are from the exported LinkedIn PDF. */
   education: [
     {
-      institution: 'Drexel University',
-      detail: 'Honors Data Science student',
-      period: '2025 – Present',
+      institution: 'Drexel University College of Computing & Informatics',
+      detail: 'Bachelor’s degree, Data Science',
+      period: 'Sep 2025 – Jun 2030',
+    },
+    {
+      institution: 'International School of Ho Chi Minh City – American Academy',
+      detail: 'High School Diploma',
+      period: 'Sep 2022 – Jun 2025',
     },
   ],
 
-  /**
-   * Experience timeline. Taken from the public LinkedIn profile
-   * (linkedin.com/in/viethunghuynh07). Co-op start date was not visible.
-   */
+  /** Experience timeline. Wording and dates are from the exported LinkedIn PDF. */
   experience: [
     {
       title: 'Software & Data Engineering Co-op, TPCOMS',
-      detail: 'Software and data engineering co-op.',
-      period: 'Current',
+      detail: 'Ho Chi Minh City, Vietnam.',
+      period: 'Sep 2026 – Present',
     },
     {
       title: 'Core Team Member, Drexel Vietnamese Student Association',
-      detail: 'Organizing activities that promote Vietnamese culture in the Drexel student community.',
+      detail:
+        'Organizing activities that promote and expand Vietnamese culture within the Drexel student community. Philadelphia, PA.',
       period: 'Oct 2025 – Present',
-    },
-    {
-      title: 'Philly CodeFest, Drexel University',
-      detail: 'Participated with a team at Drexel’s hackathon.',
-      period: 'April 2026',
     },
   ],
 } as const;

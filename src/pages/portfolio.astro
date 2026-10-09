@@ -157,7 +157,7 @@ const projects = await getProjects();
                 <li class="facts__row">
                   <div>
                     <p class="facts__title">{c.url ? <a href={c.url}>{c.title}</a> : c.title}</p>
-                    <p class="muted">{c.issuer}</p>
+                    {c.issuer && <p class="muted">{c.issuer}</p>}
                   </div>
                   {c.year && <span class="mono muted">{c.year}</span>}
                 </li>

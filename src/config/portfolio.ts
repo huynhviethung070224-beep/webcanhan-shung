@@ -65,5 +65,8 @@ export const skillGroups: SkillGroup[] = [
   },
 ];
 
-/** Certificates and additional experience. Empty until approved wording is supplied. */
-export const certificates: { title: string; issuer: string; year?: string; url?: string }[] = [];
+/** Certificates named on the exported LinkedIn PDF. Issuers were not on the export. */
+export const certificates: { title: string; issuer?: string; year?: string; url?: string }[] = [
+  { title: 'Databases and SQL for Data Science' },
+  { title: 'Vibe Coding Fundamentals' },
+];
