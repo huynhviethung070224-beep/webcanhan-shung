@@ -53,18 +53,6 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    title: 'Data analysis',
-    projectSlug: 'student-performance-analysis',
-    projectTitle: 'Student Performance Analysis',
-    role: 'Data Analysis',
-    skills: ['Python', 'Pandas', 'Jupyter', 'Exploratory analysis'],
-    contributions: [
-      'Analyzed the UCI Student Performance dataset (649 students, Portuguese subject).',
-      'Compared final grade G3 with study time, absences, previous failures, family support, and earlier grades.',
-      'Reported associations only; the write-up does not treat them as causes.',
-    ],
-  },
-  {
     title: 'SQL for business questions',
     projectSlug: 'retail-sales-analysis',
     projectTitle: 'Retail Sales Analysis',
