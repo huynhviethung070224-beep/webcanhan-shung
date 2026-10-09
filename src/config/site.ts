@@ -38,7 +38,12 @@ export const site = {
   cvPath: null as string | null,
 
   /** Owner-supplied portrait (inside `public/`). `null` uses the typographic composition. */
-  portrait: null as { src: string; alt: string; width: number; height: number } | null,
+  portrait: {
+    src: '/about/portrait.jpg',
+    alt: 'Portrait of Huynh Viet Hung (Ian).',
+    width: 460,
+    height: 460,
+  },
 
   /** Safe background facts used on About and Portfolio. */
   facts: {
@@ -47,24 +52,37 @@ export const site = {
     origin: 'Vietnam',
     interests: ['data', 'software development', 'AI'],
     hobbies: ['badminton', 'golf', 'basketball'],
-    internship: 'Internship experience in Vietnam',
+    internship: 'Software & Data Engineering Co-op at TPCOMS',
   },
 
-  /** Education timeline. Only confirmed entries. Add `period` once supplied. */
+  /** Education timeline. Dates come from the public LinkedIn profile. */
   education: [
     {
       institution: 'Drexel University',
-      detail: 'Data Science student',
-      period: null as string | null,
+      detail: 'Honors Data Science student',
+      period: '2025 – Present',
     },
   ],
 
-  /** Experience timeline. Only confirmed entries. Employer names are not yet supplied. */
+  /**
+   * Experience timeline. Taken from the public LinkedIn profile
+   * (linkedin.com/in/viethunghuynh07). Co-op start date was not visible.
+   */
   experience: [
     {
-      title: 'Internship experience',
-      detail: 'Internship experience in Vietnam, building technical skills alongside an understanding of how businesses work.',
-      period: null as string | null,
+      title: 'Software & Data Engineering Co-op, TPCOMS',
+      detail: 'Software and data engineering co-op.',
+      period: 'Current',
+    },
+    {
+      title: 'Core Team Member, Drexel Vietnamese Student Association',
+      detail: 'Organizing activities that promote Vietnamese culture in the Drexel student community.',
+      period: 'Oct 2025 – Present',
+    },
+    {
+      title: 'Philly CodeFest, Drexel University',
+      detail: 'Participated with a team at Drexel’s hackathon.',
+      period: 'April 2026',
     },
   ],
 } as const;

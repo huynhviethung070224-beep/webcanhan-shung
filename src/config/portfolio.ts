@@ -37,6 +37,42 @@ export const skillGroups: SkillGroup[] = [
     contributions: [
       'Designed a normalized database with six relational tables for books, members, branches, and borrowing records.',
       'Developed SQL reports covering overdue books, rental income, borrowing activity, and branch performance.',
+      'Schema in the repository: branch, employees, members, books, issued_status, and return_status.',
+    ],
+  },
+  {
+    title: 'Product engineering',
+    projectSlug: 'badminton-fairplay-queue',
+    projectTitle: 'Badminton FairPlay Queue',
+    role: 'Developer',
+    skills: ['TypeScript', 'React', 'Supabase', 'PostgreSQL'],
+    contributions: [
+      'Built a mobile-first queue and three-court app for a small badminton club.',
+      'Members sign in anonymously; administrators keep a separate member and payment directory.',
+      'Fairness logic stays independent of payment status and court skill labels.',
+    ],
+  },
+  {
+    title: 'Data analysis',
+    projectSlug: 'student-performance-analysis',
+    projectTitle: 'Student Performance Analysis',
+    role: 'Data Analysis',
+    skills: ['Python', 'Pandas', 'Jupyter', 'Exploratory analysis'],
+    contributions: [
+      'Analyzed the UCI Student Performance dataset (649 students, Portuguese subject).',
+      'Compared final grade G3 with study time, absences, previous failures, family support, and earlier grades.',
+      'Reported associations only; the write-up does not treat them as causes.',
+    ],
+  },
+  {
+    title: 'SQL for business questions',
+    projectSlug: 'retail-sales-analysis',
+    projectTitle: 'Retail Sales Analysis',
+    role: 'SQL Developer',
+    skills: ['PostgreSQL', 'SQL', 'Data cleaning', 'Aggregation'],
+    contributions: [
+      'Created and cleaned a retail sales table, removing rows with missing values.',
+      'Wrote queries for category sales, a clothing subset, and average customer age in one category.',
     ],
   },
 ];

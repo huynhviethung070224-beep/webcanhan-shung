@@ -10,16 +10,16 @@ What the site still needs from the owner, where it goes, and what the site shows
 | Custom domain `ianhuynh.me` | Selected; registration and hosting connection unconfirmed | `productionOrigin` in `src/config/site.ts`; `PUBLIC_SITE_ORIGIN` env for previews/temporary hosts | Metadata uses the planned origin; preview deployments use their own URL |
 | Approved CV (PDF) | Not supplied | `public/cv/<file>.pdf` + `cvPath` in `src/config/site.ts` | Portfolio shows "See the projects" / "Get in touch" instead of Download CV |
 | Preferred public contact email | Not selected | `contactEmail` in `src/config/site.ts` | Contact page shows the five profiles only; no email block |
-| Portrait / personal photos | Not supplied | `portrait` in `src/config/site.ts` (`public/about/`) | About uses a typographic monogram composition |
-| Education dates, program details | Only "Data Science student at Drexel University" confirmed | `education[]` in `src/config/site.ts` (`period`) | Timeline entry without dates |
-| Internship employer, role, dates | Only "internship experience in Vietnam" confirmed | `experience[]` in `src/config/site.ts` | Generic entry, no employer named |
+| Portrait / personal photos | GitHub avatar saved as `public/about/portrait.jpg` | Replace the file or `portrait` in `src/config/site.ts` | About shows this photo |
+| Education dates, program details | Public LinkedIn snippet: Honors Data Science, 2025–Present. Full profile page could not be opened. | `education[]` in `src/config/site.ts` | Shown on About and Portfolio |
+| Internship employer, role, dates | Public LinkedIn snippet: current Software & Data Engineering Co-op at TPCOMS (start date not visible); Drexel VSA core team Oct 2025–Present; Philly CodeFest April 2026. Confirm before treating as final. | `experience[]` in `src/config/site.ts` | Shown on About and Portfolio |
 | Certificates / additional experience | Not supplied | `certificates[]` in `src/config/portfolio.ts` | Section hidden |
 | DragonGo screenshots | Not supplied | `coverImage` and `gallery` in `src/content/projects/dragon-go.md`; files in `public/projects/dragon-go/` | Illustrative "orbit" cover, labelled as illustrative |
 | DragonGo demo URL, repository URL | Not supplied | `demoUrl`, `repoUrl` in `dragon-go.md` | Live Demo / View Code buttons hidden |
 | DragonGo hackathon name, dates, team size, outcomes, technical decisions, lessons | Not supplied | `period`, `teamSize`, `status`, `outcomes` frontmatter; "Technical decisions" / "Lessons" sections in the body | Case study covers overview, contribution and how the pieces relate, from the approved text only |
-| Library Management System ERD / schema (six tables) | Not supplied | `gallery` in `library-management-system.md`; `public/projects/library-management-system/erd.png` | Illustrative "schema" cover with six unnamed table blocks |
-| Library Management System SQL queries and real outputs | Not supplied | Body of `library-management-system.md`: for each report, the question, the query in a ```sql block, the real output (table), a short interpretation | Reports are listed by name only |
-| Library Management System repository URL | Not supplied | `repoUrl` in `library-management-system.md` | View Code hidden |
+| Library Management System ERD / schema (six tables) | Table names taken from the public repo. No ERD image in the repo (the README image points at another repository). | `gallery` in `library-management-system.md` | Case study names the six tables; cover is still illustrative |
+| Library Management System SQL queries and real outputs | Overdue query and branch-performance description are in the repo. No saved query output. | Body of `library-management-system.md` | Query is shown; result tables are not |
+| Library Management System repository URL | https://github.com/huynhviethung070224-beep/SQL_Library_Management_P2 | `repoUrl` in `library-management-system.md` | View Code is shown |
 | Blog articles | None written | `src/content/blog/<slug>.md` from `_template-new-post.md` | Designed empty state; RSS not emitted; no "Latest article" on Home |
 | Personal/project imagery for social previews | Not supplied | Generated OG images already exist per page; replace by editing `src/utils/og.ts` if photos should be used | Typographic OG template with identity + title |
 
