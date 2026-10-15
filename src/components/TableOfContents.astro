@@ -6,27 +6,49 @@ interface Props {
   /** Minimum heading count before the TOC renders. */
   min?: number;
   label?: string;
+  /** "sidebar" for the sticky desktop column, "inline" for a collapsible block on small screens. */
+  variant?: 'sidebar' | 'inline';
 }
 
-const { headings, min = 3, label = 'On this page' } = Astro.props;
+const { headings, min = 3, label = 'On this page', variant = 'sidebar' } = Astro.props;
 const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const list = items.map((h) => ({ ...h, cls: `toc__item toc__item--d${h.depth}` }));
 ---
 
 {
-  items.length >= min && (
-    <nav class="toc" aria-label={label} data-toc>
-      <p class="toc__label eyebrow eyebrow--plain">{label}</p>
-      <ol class="toc__list">
-        {items.map((h) => (
-          <li class:list={['toc__item', `toc__item--d${h.depth}`]}>
-            <a href={`#${h.slug}`} class="toc__link" data-toc-link={h.slug}>
-              {h.text}
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  )
+  items.length >= min &&
+    (variant === 'sidebar' ? (
+      <nav class="toc toc--sidebar" aria-label={label} data-toc>
+        <p class="toc__label eyebrow eyebrow--plain">{label}</p>
+        <ol class="toc__list">
+          {list.map((h) => (
+            <li class={h.cls}>
+              <a href={`#${h.slug}`} class="toc__link" data-toc-link={h.slug}>
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    ) : (
+      <details class="toc toc--inline" data-toc>
+        <summary class="toc__summary">
+          <span class="eyebrow eyebrow--plain">{label}</span>
+          <span class="toc__count mono">{items.length} sections</span>
+        </summary>
+        <nav aria-label={label}>
+          <ol class="toc__list">
+            {list.map((h) => (
+              <li class={h.cls}>
+                <a href={`#${h.slug}`} class="toc__link" data-toc-link={h.slug}>
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </details>
+    ))
 }
 
 <style>
@@ -70,31 +92,106 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     color: var(--accent);
     border-left-color: var(--accent);
   }
+
+  .toc--inline {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+  }
+
+  .toc__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: var(--control-height);
+    padding: 0 var(--space-4);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .toc__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc__summary::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-right: 1.5px solid var(--text-muted);
+    border-bottom: 1.5px solid var(--text-muted);
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+
+  .toc--inline[open] .toc__summary::after {
+    transform: rotate(-135deg);
+  }
+
+  .toc__count {
+    margin-left: auto;
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+  }
+
+  .toc--inline nav {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  .toc--inline .toc__link {
+    min-height: var(--control-height-sm);
+    display: flex;
+    align-items: center;
+  }
+
+  @media (min-width: 960px) {
+    .toc--inline {
+      display: none;
+    }
+  }
+
+  @media (max-width: 959px) {
+    .toc--sidebar {
+      display: none;
+    }
+  }
 </style>
 
 <script>
-  const toc = document.querySelector<HTMLElement>('[data-toc]');
-  if (toc) {
-    const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
-    const targets = links
-      .map((l) => document.getElementById(l.dataset.tocLink ?? ''))
-      .filter((el): el is HTMLElement => Boolean(el));
+  import { bindOnce, onPageReady } from '../scripts/lifecycle';
+
+  bindOnce('toc-inline-close', () => {
+    document.addEventListener('click', (event) => {
+      const link = (event.target as Element | null)?.closest('.toc--inline [data-toc-link]');
+      link?.closest('details')?.removeAttribute('open');
+    });
+  });
+
+  onPageReady(() => {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc] [data-toc-link]'));
+    if (links.length === 0 || !('IntersectionObserver' in window)) return;
+    const ids = [...new Set(links.map((l) => l.dataset.tocLink ?? ''))];
+    const targets = ids.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => Boolean(el));
 
     const setActive = (id: string) => {
-      links.forEach((l) => l.classList.toggle('is-active', l.dataset.tocLink === id));
+      links.forEach((l) => {
+        const active = l.dataset.tocLink === id;
+        l.classList.toggle('is-active', active);
+        if (active) l.setAttribute('aria-current', 'location');
+        else l.removeAttribute('aria-current');
+      });
     };
 
-    if (targets.length && 'IntersectionObserver' in window) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          const visible = entries
-            .filter((e) => e.isIntersecting)
-            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-          if (visible[0]) setActive(visible[0].target.id);
-        },
-        { rootMargin: '-20% 0px -65% 0px', threshold: [0, 1] },
-      );
-      targets.forEach((t) => io.observe(t));
-    }
-  }
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActive(visible[0].target.id);
+      },
+      { rootMargin: '-20% 0px -65% 0px', threshold: [0, 1] },
+    );
+    targets.forEach((t) => io.observe(t));
+    return () => io.disconnect();
+  });
 </script>

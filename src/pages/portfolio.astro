@@ -2,27 +2,40 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import Icon from '../components/Icon.astro';
+import TimelineCard from '../components/TimelineCard.astro';
+import CertificateCard from '../components/CertificateCard.astro';
+import ResumeActions from '../components/ResumeActions.astro';
+import Availability from '../components/Availability.astro';
+import Lightbox from '../components/Lightbox.astro';
 import { site } from '../config/site';
 import { skillGroups, certificates } from '../config/portfolio';
 import { getProjects } from '../utils/content';
+import { listJoin } from '../utils/format';
 
 const title = 'Portfolio';
-const description = `Professional overview of ${site.displayName}: education at Drexel University, skills demonstrated through DragonGo and the Library Management System, and contributions.`;
+const description = `Professional overview of ${site.displayName}: education at ${site.facts.school}, experience, and skills demonstrated through ${listJoin(skillGroups.map((g) => g.projectTitle))}.`;
 const projects = await getProjects();
+const byOrder = <T extends { order: number }>(items: readonly T[]) => [...items].sort((a, b) => a.order - b.order);
+const professionalSections = [
+  { id: 'education', eyebrow: 'Education', title: 'Where I’m studying', entries: byOrder(site.education) },
+  { id: 'experience', eyebrow: 'Work Experience', title: 'Professional experience', entries: byOrder(site.workExperience) },
+  { id: 'leadership', eyebrow: 'Leadership / Activities', title: 'Community involvement', entries: byOrder(site.leadership) },
+].filter((section) => section.entries.length > 0);
+const sortedCertificates = byOrder(certificates);
+const hasCertificateImages = sortedCertificates.some((c) => c.asset?.type === 'image');
 ---
 
 <BaseLayout title={title} description={description} ogKey="portfolio">
   <PageHead
     eyebrow="Portfolio"
     title="A quick professional overview."
-    lead="Education, the skills behind each project, and what I actually built — with every skill linked to the case study that backs it up."
+    lead="Education, experience, and the skills behind each project — with every skill linked to the case study that backs it up."
   >
+    <Availability class="head-availability" />
     <div class="head-actions">
       {
-        site.cvPath ? (
-          <a href={site.cvPath} class="btn btn--primary" download>
-            Download CV <Icon name="download" size={18} />
-          </a>
+        site.resume ? (
+          <ResumeActions />
         ) : (
           <a href="/projects" class="btn btn--primary">
             See the projects <Icon name="arrow-right" size={18} class="arrow" />
@@ -33,40 +46,28 @@ const projects = await getProjects();
     </div>
   </PageHead>
 
-  <section class="section" aria-labelledby="edu-title">
-    <div class="container two-col">
-      <div class="two-col__aside reveal">
-        <p class="eyebrow">Education</p>
-        <h2 id="edu-title" class="h2">Where I’m studying</h2>
-      </div>
-      <div class="two-col__main reveal">
-        <ul class="facts">
-          {
-            site.education.map((item) => (
-              <li class="facts__row">
-                <div>
-                  <p class="facts__title">{item.institution}</p>
-                  <p class="muted">{item.detail}</p>
-                </div>
-                {item.period && <span class="mono muted">{item.period}</span>}
-              </li>
-            ))
-          }
-          {
-            site.experience.map((item) => (
-              <li class="facts__row">
-                <div>
-                  <p class="facts__title">{item.title}</p>
-                  <p class="muted">{item.detail}</p>
-                </div>
-                {item.period && <span class="mono muted">{item.period}</span>}
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-    </div>
-  </section>
+  {
+    professionalSections.map((section, i) => (
+      <section class="section" aria-labelledby={`${section.id}-title`}>
+        <div class="container">
+          {i > 0 && <hr class="rule" />}
+          <div class:list={['two-col', { 'two-col--pad': i > 0 }]}>
+            <div class="two-col__aside reveal">
+              <p class="eyebrow">{section.eyebrow}</p>
+              <h2 id={`${section.id}-title`} class="h2">
+                {section.title}
+              </h2>
+            </div>
+            <div class="two-col__main entries reveal">
+              {section.entries.map((entry) => (
+                <TimelineCard entry={entry} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    ))
+  }
 
   <section class="section" aria-labelledby="skills-title">
     <div class="container">
@@ -143,7 +144,7 @@ const projects = await getProjects();
   </section>
 
   {
-    certificates.length > 0 && (
+    sortedCertificates.length > 0 && (
       <section class="section" aria-labelledby="cert-title">
         <div class="container">
           <hr class="rule" />
@@ -152,14 +153,10 @@ const projects = await getProjects();
               <p class="eyebrow">Certificates</p>
               <h2 id="cert-title" class="h2">Credentials</h2>
             </div>
-            <ul class="two-col__main facts reveal">
-              {certificates.map((c) => (
-                <li class="facts__row">
-                  <div>
-                    <p class="facts__title">{c.url ? <a href={c.url}>{c.title}</a> : c.title}</p>
-                    {c.issuer && <p class="muted">{c.issuer}</p>}
-                  </div>
-                  {c.year && <span class="mono muted">{c.year}</span>}
+            <ul class="two-col__main certs reveal">
+              {sortedCertificates.map((certificate) => (
+                <li>
+                  <CertificateCard certificate={certificate} />
                 </li>
               ))}
             </ul>
@@ -173,22 +170,20 @@ const projects = await getProjects();
     <div class="container">
       <div class="cv reveal">
         <div>
-          <p class="eyebrow">CV</p>
-          <h2 id="cv-title" class="h2">{site.cvPath ? 'Download the current CV' : 'Prefer a conversation?'}</h2>
+          <p class="eyebrow">Resume</p>
+          <h2 id="cv-title" class="h2">{site.resume ? 'The current resume' : 'Prefer a conversation?'}</h2>
           <p class="muted cv__note">
             {
-              site.cvPath
-                ? 'A PDF copy of my current CV, matching the information on this page.'
+              site.resume
+                ? `View it in the browser or download the PDF${site.resume.updatedAt ? ` — updated ${site.resume.updatedAt}` : ''}.`
                 : 'Everything on this page reflects my current work. For anything else, the Contact page has every way to reach me.'
             }
           </p>
         </div>
         <div class="head-actions">
           {
-            site.cvPath ? (
-              <a href={site.cvPath} class="btn btn--primary" download>
-                Download CV <Icon name="download" size={18} />
-              </a>
+            site.resume ? (
+              <ResumeActions />
             ) : (
               <a href="/contact" class="btn btn--primary">
                 Get in touch <Icon name="arrow-right" size={18} class="arrow" />
@@ -199,6 +194,8 @@ const projects = await getProjects();
       </div>
     </div>
   </section>
+
+  {hasCertificateImages && <Lightbox />}
 </BaseLayout>
 
 <style>
@@ -207,6 +204,10 @@ const projects = await getProjects();
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-6);
+  }
+
+  :global(.head-availability) {
+    margin-top: var(--space-5);
   }
 
   .h2 {
@@ -238,21 +239,16 @@ const projects = await getProjects();
     }
   }
 
-  .facts {
-    list-style: none;
+  .two-col__main {
+    min-width: 0;
+  }
+
+  .entries {
     border-top: 1px solid var(--border);
   }
 
-  .facts__row {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-4);
-    padding-block: var(--space-4);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .facts__title {
-    font-weight: 600;
+  .entries > :global(.entry:first-child) {
+    padding-top: var(--space-4);
   }
 
   .groups {
@@ -286,6 +282,7 @@ const projects = await getProjects();
 
   .group__evidence {
     font-size: var(--text-sm);
+    min-height: 32px;
   }
 
   .group__role {
@@ -353,6 +350,18 @@ const projects = await getProjects();
 
   .summary__title a:hover {
     color: var(--accent);
+  }
+
+  .certs {
+    list-style: none;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .certs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .cv {

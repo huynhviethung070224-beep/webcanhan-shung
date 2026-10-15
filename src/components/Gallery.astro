@@ -1,0 +1,164 @@
+---
+/**
+ * Responsive grid of captioned images that open in the shared <Lightbox />.
+ * Items in one gallery share a lightbox group for Previous/Next browsing.
+ */
+import Icon from './Icon.astro';
+
+export interface GalleryImage {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  caption?: string;
+  frame?: 'browser' | 'plain';
+}
+
+interface Props {
+  items: GalleryImage[];
+  /** Lightbox group name; unique per gallery on a page. */
+  group: string;
+  /** Text shown in the faux browser bar of `frame: browser` items. */
+  frameLabel?: string;
+  /** Column behaviour: "grid" for screenshots, "wide" for one-per-row charts/diagrams. */
+  layout?: 'grid' | 'wide';
+}
+
+const { items, group, frameLabel = '', layout = 'grid' } = Astro.props;
+---
+
+<ul class:list={['gallery', `gallery--${layout}`]}>
+  {
+    items.map((item) => (
+      <li>
+        <figure class="gallery__figure">
+          <a
+            href={item.src}
+            data-lightbox
+            data-lightbox-group={group}
+            data-caption={item.caption ?? ''}
+            data-alt={item.alt}
+            class:list={['gallery__link', { 'gallery__link--browser': item.frame === 'browser' }]}
+            aria-label={`Open larger image: ${item.alt}`}
+          >
+            {item.frame === 'browser' && (
+              <span class="gallery__bar" aria-hidden="true">
+                <span class="gallery__dots" />
+                {frameLabel}
+              </span>
+            )}
+            <img src={item.src} alt={item.alt} width={item.width} height={item.height} loading="lazy" decoding="async" />
+            <span class="gallery__zoom" aria-hidden="true">
+              <Icon name="zoom" size={16} />
+            </span>
+          </a>
+          {item.caption && <figcaption>{item.caption}</figcaption>}
+        </figure>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .gallery {
+    list-style: none;
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 640px) {
+    .gallery--grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .gallery--grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .gallery__figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .gallery__link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #101210;
+    aspect-ratio: 16 / 11;
+    transition: border-color var(--dur-hover) var(--ease-out);
+  }
+
+  .gallery--wide .gallery__link {
+    aspect-ratio: auto;
+    max-height: 70vh;
+  }
+
+  .gallery__link:hover {
+    border-color: var(--accent-line);
+  }
+
+  .gallery__link img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .gallery__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 28px;
+    padding: 0 0.7rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    flex: none;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .gallery__dots {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    box-shadow:
+      12px 0 0 var(--border-strong),
+      24px 0 0 var(--border-strong);
+    margin-right: 28px;
+    flex: none;
+  }
+
+  .gallery__zoom {
+    position: absolute;
+    right: var(--space-3);
+    bottom: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+  }
+
+  .gallery__figure figcaption {
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+  }
+</style>

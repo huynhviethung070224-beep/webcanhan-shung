@@ -6,9 +6,10 @@ import CopyButton from '../components/CopyButton.astro';
 import Icon from '../components/Icon.astro';
 import { site } from '../config/site';
 import { publishedSocialLinks } from '../config/social';
+import { listJoin } from '../utils/format';
 
 const title = 'Contact';
-const description = `Connect with ${site.displayName} on GitHub, LinkedIn, YouTube, Instagram, and Facebook.`;
+const description = `Connect with ${site.displayName} on ${listJoin(publishedSocialLinks.map((link) => link.label))}${site.contactEmail ? ', or by email' : ''}.`;
 ---
 
 <BaseLayout title={title} description={description} ogKey="contact">

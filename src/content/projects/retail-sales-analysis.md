@@ -6,6 +6,7 @@ summary: A PostgreSQL project on a retail sales dataset. I created the database,
 technologies:
   - PostgreSQL
   - SQL
+category: Database & SQL
 cover: schema
 coverAlt: Illustrative cover for the retail sales analysis.
 purpose: Practice cleaning a sales table and answering straightforward business questions in SQL.

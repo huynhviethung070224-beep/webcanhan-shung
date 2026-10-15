@@ -1,20 +1,30 @@
 ---
 /**
- * Accessible zoom for captioned images. Any element with `data-lightbox`
- * (an <a href="full.png"> around an <img>) opens here. Includes visible
- * close control, Escape handling and focus return.
+ * Accessible image viewer. Any `<a data-lightbox href="full.png">` around an
+ * <img> opens here; links sharing `data-lightbox-group` can be browsed with
+ * Previous/Next buttons and the arrow keys. Escape or Close returns focus to
+ * the link that opened it. Without JS the link simply opens the image.
  */
 import Icon from './Icon.astro';
 ---
 
-<dialog class="lightbox" data-lightbox-dialog aria-label="Image preview">
-  <button class="lightbox__close" type="button" data-lightbox-close aria-label="Close image preview">
-    <Icon name="close" size={22} />
-  </button>
+<dialog class="lightbox" data-lightbox-dialog aria-label="Image viewer">
+  <div class="lightbox__bar">
+    <p class="lightbox__count mono" data-lightbox-count aria-live="polite"></p>
+    <button class="lightbox__btn" type="button" data-lightbox-close aria-label="Close image viewer">
+      <Icon name="close" size={22} />
+    </button>
+  </div>
   <figure class="lightbox__figure">
     <img class="lightbox__img" alt="" data-lightbox-img />
     <figcaption class="lightbox__caption" data-lightbox-caption></figcaption>
   </figure>
+  <button class="lightbox__btn lightbox__nav lightbox__nav--prev" type="button" data-lightbox-prev aria-label="Previous image" hidden>
+    <Icon name="arrow-left" size={22} />
+  </button>
+  <button class="lightbox__btn lightbox__nav lightbox__nav--next" type="button" data-lightbox-next aria-label="Next image" hidden>
+    <Icon name="arrow-right" size={22} />
+  </button>
 </dialog>
 
 <style>
@@ -25,8 +35,9 @@ import Icon from './Icon.astro';
     max-height: 100dvh;
     width: 100vw;
     height: 100dvh;
-    background: rgba(8, 10, 8, 0.92);
+    background: rgba(8, 10, 8, 0.94);
     color: var(--text);
+    overscroll-behavior: contain;
   }
 
   .lightbox::backdrop {
@@ -35,14 +46,25 @@ import Icon from './Icon.astro';
 
   .lightbox[open] {
     display: grid;
-    place-items: center;
-    padding: var(--gutter);
+    grid-template-rows: auto 1fr;
+    padding: var(--space-3) var(--gutter) var(--space-5);
   }
 
-  .lightbox__close {
-    position: fixed;
-    top: var(--space-4);
-    right: var(--space-4);
+  .lightbox__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: var(--control-height);
+  }
+
+  .lightbox__count {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+  }
+
+  .lightbox__btn {
     width: var(--control-height);
     height: var(--control-height);
     display: inline-flex;
@@ -52,69 +74,167 @@ import Icon from './Icon.astro';
     border: 1px solid var(--border-strong);
     background: var(--bg-elevated);
     color: var(--text);
+    flex: none;
   }
 
-  .lightbox__close:hover {
+  .lightbox__btn:hover {
     border-color: var(--accent);
     color: var(--accent);
   }
 
+  .lightbox__btn[hidden] {
+    display: none;
+  }
+
+  .lightbox__nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .lightbox__nav--prev {
+    left: var(--space-3);
+  }
+
+  .lightbox__nav--next {
+    right: var(--space-3);
+  }
+
   .lightbox__figure {
     display: grid;
+    align-content: center;
     gap: var(--space-3);
+    min-height: 0;
     max-width: min(100%, 1400px);
+    margin-inline: auto;
   }
 
   .lightbox__img {
     max-width: 100%;
-    max-height: calc(100dvh - var(--gutter) * 2 - 3rem);
+    max-height: calc(100dvh - var(--control-height) - var(--space-3) - var(--space-5) - 4.5rem);
     width: auto;
     height: auto;
     margin-inline: auto;
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
+    background: #0e100e;
   }
 
   .lightbox__caption {
     text-align: center;
     color: var(--text-muted);
     font-size: var(--text-sm);
+    max-width: 70ch;
+    margin-inline: auto;
   }
 
   .lightbox__caption:empty {
     display: none;
   }
+
+  @media (max-width: 639px) {
+    .lightbox__nav {
+      top: auto;
+      bottom: var(--space-4);
+      transform: none;
+    }
+    .lightbox[open] {
+      padding-bottom: calc(var(--control-height) + var(--space-6));
+    }
+  }
 </style>
 
 <script>
-  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
-  if (dialog && typeof dialog.showModal === 'function') {
-    const img = dialog.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
-    const caption = dialog.querySelector<HTMLElement>('[data-lightbox-caption]')!;
-    const closeBtn = dialog.querySelector<HTMLButtonElement>('[data-lightbox-close]')!;
-    let opener: HTMLElement | null = null;
+  import { bindOnce, onPageReady } from '../scripts/lifecycle';
 
-    document.querySelectorAll<HTMLAnchorElement>('a[data-lightbox]').forEach((link) => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        opener = link;
-        const thumb = link.querySelector('img');
-        img.src = link.href;
-        img.alt = thumb?.alt ?? '';
-        caption.textContent = link.dataset.caption ?? '';
-        dialog.showModal();
-        closeBtn.focus();
-      });
-    });
+  let opener: HTMLAnchorElement | null = null;
+  let group: HTMLAnchorElement[] = [];
+  let index = 0;
 
-    const close = () => dialog.close();
-    closeBtn.addEventListener('click', close);
-    dialog.addEventListener('click', (e) => {
-      if (e.target === dialog) close();
-    });
-    dialog.addEventListener('close', () => {
-      img.removeAttribute('src');
-      opener?.focus();
-    });
+  const dialog = () => document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+
+  function groupFor(link: HTMLAnchorElement): HTMLAnchorElement[] {
+    const name = link.dataset.lightboxGroup;
+    if (!name) return [link];
+    return Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-lightbox]')).filter(
+      (a) => a.dataset.lightboxGroup === name,
+    );
   }
+
+  function show(i: number) {
+    const dlg = dialog();
+    if (!dlg || group.length === 0) return;
+    index = (i + group.length) % group.length;
+    const link = group[index]!;
+    const img = dlg.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
+    const caption = dlg.querySelector<HTMLElement>('[data-lightbox-caption]')!;
+    const count = dlg.querySelector<HTMLElement>('[data-lightbox-count]')!;
+    const thumb = link.querySelector('img');
+    img.src = link.href;
+    img.alt = link.dataset.alt ?? thumb?.alt ?? '';
+    caption.textContent = link.dataset.caption ?? '';
+    count.textContent = group.length > 1 ? `Image ${index + 1} of ${group.length}` : '';
+    const multi = group.length > 1;
+    dlg.querySelector<HTMLButtonElement>('[data-lightbox-prev]')!.hidden = !multi;
+    dlg.querySelector<HTMLButtonElement>('[data-lightbox-next]')!.hidden = !multi;
+  }
+
+  function close() {
+    dialog()?.close();
+  }
+
+  bindOnce('lightbox', () => {
+    document.addEventListener('click', (event) => {
+      const target = event.target as Element | null;
+      const dlg = dialog();
+      if (!dlg || typeof dlg.showModal !== 'function') return;
+
+      const link = target?.closest<HTMLAnchorElement>('a[data-lightbox]');
+      if (link && !dlg.contains(link)) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        event.preventDefault();
+        opener = link;
+        group = groupFor(link);
+        show(group.indexOf(link));
+        dlg.showModal();
+        dlg.querySelector<HTMLButtonElement>('[data-lightbox-close]')?.focus();
+        return;
+      }
+
+      if (!dlg.open) return;
+      if (target?.closest('[data-lightbox-close]') || target === dlg) close();
+      else if (target?.closest('[data-lightbox-prev]')) show(index - 1);
+      else if (target?.closest('[data-lightbox-next]')) show(index + 1);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      const dlg = dialog();
+      if (!dlg?.open || group.length < 2) return;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        show(index + 1);
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        show(index - 1);
+      }
+    });
+
+    // `close` does not bubble, so listen in the capture phase on document.
+    document.addEventListener(
+      'close',
+      (event) => {
+        const dlg = event.target as HTMLElement;
+        if (!dlg.matches?.('[data-lightbox-dialog]')) return;
+        dlg.querySelector('[data-lightbox-img]')?.removeAttribute('src');
+        opener?.focus();
+        opener = null;
+      },
+      true,
+    );
+  });
+
+  onPageReady(({ restored }) => {
+    if (restored && dialog()?.open) close();
+  });
 </script>

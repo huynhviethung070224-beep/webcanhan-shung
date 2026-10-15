@@ -30,14 +30,13 @@ const ogImage = absoluteUrl(ogImagePath(ogKey), Astro.site);
 
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={canonical} />
-{noindex && <meta name="robots" content="noindex" />}
+{noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
 
 <meta property="og:site_name" content={site.displayName} />
 <meta property="og:type" content={type} />
 <meta property="og:title" content={title ?? site.displayName} />
 <meta property="og:description" content={description} />
-<meta property="og:url" content={canonical} />
+{!noindex && <meta property="og:url" content={canonical} />}
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />

@@ -3,31 +3,65 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroOrbit from '../components/HeroOrbit.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Icon from '../components/Icon.astro';
+import Availability from '../components/Availability.astro';
+import Portrait from '../components/Portrait.astro';
+import ResumeActions from '../components/ResumeActions.astro';
 import { site } from '../config/site';
-import { getFeaturedProjects, getPosts, formatDate, readingTime } from '../utils/content';
+import { skillGroups } from '../config/portfolio';
+import { publishedSocialLinks } from '../config/social';
+import { getFeaturedProjects, getProjects, getPublishedPosts, formatDate, readingTime } from '../utils/content';
+import { countWord, plural } from '../utils/format';
 
 const projects = await getFeaturedProjects();
-const posts = await getPosts();
+const allProjects = await getProjects();
+const posts = await getPublishedPosts();
 const latest = posts[0];
+const workTitle = `${countWord(projects.length, true)} featured ${plural(projects.length, 'project', 'projects')}`;
+const moreCount = allProjects.length - projects.length;
+const currentStudy = [...site.education].sort((a, b) => a.order - b.order)[0];
+const origin = Astro.site?.toString() ?? `${site.productionOrigin}/`;
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.fullName,
+  alternateName: site.nickname,
+  url: origin,
+  description: site.description,
+  ...(site.portrait ? { image: new URL(site.portrait.src, origin).toString() } : {}),
+  affiliation: { '@type': 'CollegeOrUniversity', name: site.facts.school },
+  sameAs: publishedSocialLinks.map((link) => link.url),
+};
 ---
 
 <BaseLayout ogKey="home">
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(personLd)} />
   <section class="hero" aria-labelledby="hero-title">
     <HeroOrbit />
-    <div class="container hero__inner">
-      <p class="eyebrow hero__eyebrow">{site.facts.program} · {site.facts.school}</p>
-      <h1 id="hero-title" class="hero__title">
-        <span class="hero__name">{site.fullName}</span>
-        <span class="hero__nick serif">({site.nickname})</span>
-      </h1>
-      <p class="hero__status">{site.statusLine}</p>
-      <p class="hero__intro">{site.intro}</p>
-      <div class="hero__actions">
-        <a href="/projects" class="btn btn--primary">
-          View Projects <Icon name="arrow-right" size={18} class="arrow" />
-        </a>
-        <a href="/about" class="btn btn--ghost">About Me</a>
+    <div class:list={['container hero__inner', { 'hero__inner--portrait': site.portrait }]}>
+      <div class="hero__text">
+        <p class="eyebrow hero__eyebrow">{site.facts.program} · {site.facts.school}</p>
+        <h1 id="hero-title" class="hero__title">
+          <span class="hero__name">{site.fullName}</span>
+          <span class="hero__nick serif">({site.nickname})</span>
+        </h1>
+        <p class="hero__status">{site.statusLine}</p>
+        <Availability class="hero__availability" />
+        <p class="hero__intro">{site.intro}</p>
+        <div class="hero__actions">
+          <a href="/projects" class="btn btn--primary">
+            View Projects <Icon name="arrow-right" size={18} class="arrow" />
+          </a>
+          <ResumeActions tone="ghost" view={false} />
+          <a href="/contact" class="btn btn--ghost">Contact</a>
+        </div>
       </div>
+      {
+        site.portrait && (
+          <div class="hero__portrait">
+            <Portrait size="hero" fallback={false} loading="eager" />
+          </div>
+        )
+      }
     </div>
   </section>
 
@@ -35,7 +69,7 @@ const latest = posts[0];
     <div class="container">
       <div class="section-head reveal">
         <p class="eyebrow">Selected work</p>
-        <h2 id="work-title">Two projects, two sides of the stack</h2>
+        <h2 id="work-title">{workTitle}</h2>
       </div>
       <div class="work">
         {
@@ -48,7 +82,8 @@ const latest = posts[0];
       </div>
       <div class="reveal work__more">
         <a href="/projects" class="textlink">
-          All projects <Icon name="arrow-right" size={18} class="arrow" />
+          {moreCount > 0 ? `All ${allProjects.length} projects` : 'All projects'}
+          <Icon name="arrow-right" size={18} class="arrow" />
         </a>
       </div>
     </div>
@@ -68,22 +103,31 @@ const latest = posts[0];
             page groups it so you can get the picture in a minute.
           </p>
           <dl class="portfolio-preview__facts">
-            <div>
-              <dt class="mono">Education</dt>
-              <dd>{site.facts.program}, {site.facts.school}</dd>
-            </div>
-            <div>
-              <dt class="mono">Backend & data</dt>
-              <dd>JavaScript, Firebase Authentication, Cloud Firestore</dd>
-            </div>
-            <div>
-              <dt class="mono">Databases</dt>
-              <dd>PostgreSQL, SQL, relational design</dd>
-            </div>
+            {
+              currentStudy && (
+                <div>
+                  <dt class="mono">Education</dt>
+                  <dd>
+                    {currentStudy.title}, {site.facts.school}
+                  </dd>
+                </div>
+              )
+            }
+            {
+              skillGroups.slice(0, 3).map((group) => (
+                <div>
+                  <dt class="mono">{group.title}</dt>
+                  <dd>{group.skills.join(', ')}</dd>
+                </div>
+              ))
+            }
           </dl>
-          <a href="/portfolio" class="btn btn--ghost btn--sm">
-            Open Portfolio <Icon name="arrow-right" size={16} class="arrow" />
-          </a>
+          <div class="portfolio-preview__actions">
+            <a href="/portfolio" class="btn btn--ghost btn--sm">
+              Open Portfolio <Icon name="arrow-right" size={16} class="arrow" />
+            </a>
+            <ResumeActions tone="ghost" size="sm" view={false} />
+          </div>
         </div>
       </div>
     </div>
@@ -135,9 +179,31 @@ const latest = posts[0];
   .hero__inner {
     position: relative;
     z-index: 1;
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .hero__text {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--space-5);
+    min-width: 0;
+  }
+
+  .hero__portrait {
+    width: min(60vw, 240px);
+  }
+
+  @media (min-width: 900px) {
+    .hero__inner--portrait {
+      grid-template-columns: minmax(0, 1fr) clamp(220px, 24vw, 320px);
+      align-items: center;
+    }
+    .hero__portrait {
+      width: 100%;
+      order: 2;
+    }
   }
 
   .hero__title {
@@ -191,8 +257,10 @@ const latest = posts[0];
     .hero__eyebrow,
     .hero__title,
     .hero__status,
+    .hero__text > :global(.hero__availability),
     .hero__intro,
-    .hero__actions {
+    .hero__actions,
+    .hero__portrait {
       animation: rise 600ms var(--ease-out) both;
     }
     .hero__title {
@@ -252,6 +320,12 @@ const latest = posts[0];
     flex-direction: column;
     gap: var(--space-5);
     align-items: flex-start;
+  }
+
+  .portfolio-preview__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
   }
 
   .portfolio-preview__facts {

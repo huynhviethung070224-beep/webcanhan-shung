@@ -341,15 +341,44 @@ pre {
   white-space: nowrap;
 }
 
+/* Client-side filters hide items with the `hidden` attribute; keep it authoritative over layout classes. */
+[data-filter-item][hidden],
+[data-filter-group][hidden],
+[data-filter-empty][hidden] {
+  display: none !important;
+}
+
+/* Compact empty / no-match state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  max-width: var(--prose-width);
+}
+
+.empty-state__title {
+  font-size: var(--text-xl);
+  font-weight: 500;
+}
+
 /* Reveal on scroll (content stays visible without JS) */
 .reveal {
   opacity: 1;
   transform: none;
 }
 
-html.js .reveal {
+html.js .reveal:not(.is-visible) {
   opacity: 0;
   transform: translateY(14px);
+  /* If the reveal script never runs (blocked, failed), show content anyway. */
+  animation: reveal-fallback 1ms linear 3.5s forwards;
+}
+
+html.js .reveal {
   transition:
     opacity var(--dur-reveal) var(--ease-out),
     transform var(--dur-reveal) var(--ease-out);
@@ -361,11 +390,20 @@ html.js .reveal.is-visible {
   transform: none;
 }
 
+@keyframes reveal-fallback {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html.js .reveal {
+  html.js .reveal,
+  html.js .reveal:not(.is-visible) {
     opacity: 1;
     transform: none;
     transition: none;
+    animation: none;
   }
 
   *,
@@ -378,11 +416,7 @@ html.js .reveal.is-visible {
   }
 }
 
-/* View transitions: short cross-fade */
-@view-transition {
-  navigation: auto;
-}
-
+/* View transitions: short cross-fade (opt-in is inlined in BaseLayout) */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: var(--dur-route);

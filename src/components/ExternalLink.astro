@@ -1,0 +1,29 @@
+---
+/**
+ * Link that opens external pages and local files (PDFs, notebooks) in a new tab
+ * with `rel="noopener noreferrer"` and an accessible "(opens in a new tab)" note.
+ * Internal routes (`/projects/x`) stay in the same tab.
+ */
+interface Props {
+  href: string;
+  class?: string;
+  /** Force same-tab behaviour even for files. */
+  sameTab?: boolean;
+  [key: string]: unknown;
+}
+
+const { href, class: className, sameTab = false, ...rest } = Astro.props;
+const isInternalRoute = href.startsWith('/') && !href.startsWith('//') && !/\.[a-z0-9]{2,5}$/i.test(href);
+const newTab = !sameTab && !isInternalRoute;
+---
+
+<a
+  href={href}
+  class={className}
+  target={newTab ? '_blank' : undefined}
+  rel={newTab ? 'noopener noreferrer' : undefined}
+  {...rest}
+>
+  <slot />
+  {newTab && <span class="visually-hidden"> (opens in a new tab)</span>}
+</a>

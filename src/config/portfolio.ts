@@ -1,8 +1,10 @@
 /**
  * Portfolio page content: skills grouped by the project that demonstrates them.
  * Every skill links back to the case study that is its evidence.
- * Add certificates/experience entries here once their approved wording exists.
+ * Add certificate details here once their approved wording and evidence exist.
  */
+
+import { validateContentLink, validateOptionalPublicAsset } from '../utils/validation';
 
 export interface SkillGroup {
   title: string;
@@ -65,8 +67,30 @@ export const skillGroups: SkillGroup[] = [
   },
 ];
 
-/** Certificates named on the exported LinkedIn PDF. Issuers were not on the export. */
-export const certificates: { title: string; issuer?: string; year?: string; url?: string }[] = [
-  { title: 'Databases and SQL for Data Science' },
-  { title: 'Vibe Coding Fundamentals' },
+export interface Certificate {
+  title: string;
+  issuer?: string;
+  issuedAt?: string;
+  credentialId?: string;
+  verificationUrl?: string;
+  asset?:
+    | { type: 'image'; src: string; alt: string }
+    | { type: 'pdf'; src: string; alt?: string };
+  order: number;
+}
+
+/** Certificates named on the exported LinkedIn PDF. Missing details intentionally remain absent. */
+export const certificates: Certificate[] = [
+  { title: 'Databases and SQL for Data Science', order: 1 },
+  { title: 'Vibe Coding Fundamentals', order: 2 },
 ];
+
+for (const [index, certificate] of certificates.entries()) {
+  validateOptionalPublicAsset(certificate.asset?.src, `src/config/portfolio.ts certificates[${index}].asset.src`);
+  if (certificate.asset?.type === 'image' && !certificate.asset.alt.trim()) {
+    throw new Error(`src/config/portfolio.ts certificates[${index}].asset.alt: image alt text cannot be empty.`);
+  }
+  if (certificate.verificationUrl) {
+    validateContentLink(certificate.verificationUrl, `src/config/portfolio.ts certificates[${index}].verificationUrl`);
+  }
+}

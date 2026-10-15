@@ -2,6 +2,8 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { resolveSiteOrigin } from './src/config/site.ts';
+import { satteri } from '@astrojs/markdown-satteri';
+import { publicImageSizePlugin } from './src/utils/markdown-image-size.ts';
 
 const siteOrigin = resolveSiteOrigin();
 
@@ -19,9 +21,21 @@ export default defineConfig({
     }),
   ],
   markdown: {
+    processor: satteri({ hastPlugins: [publicImageSizePlugin] }),
     shikiConfig: {
       theme: 'github-dark-default',
       wrap: false,
+      transformers: [
+        {
+          // prose.css scrolls the <code>, not the <pre>, so the keyboard stop belongs on <code>.
+          pre(node) {
+            delete node.properties.tabindex;
+          },
+          code(node) {
+            node.properties.tabindex = '0';
+          },
+        },
+      ],
     },
   },
   build: {

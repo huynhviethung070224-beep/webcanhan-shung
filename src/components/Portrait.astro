@@ -1,0 +1,104 @@
+---
+/**
+ * Owner portrait from `site.portrait`, or the typographic monogram when none
+ * is configured. `fallback={false}` renders nothing instead (used on Home).
+ */
+import { site } from '../config/site';
+
+interface Props {
+  size?: 'hero' | 'panel';
+  fallback?: boolean;
+  loading?: 'eager' | 'lazy';
+}
+
+const { size = 'panel', fallback = true, loading = 'lazy' } = Astro.props;
+const portrait = site.portrait;
+const initials = site.fullName
+  .split(' ')
+  .map((w) => w[0])
+  .join('');
+---
+
+{
+  portrait ? (
+    <img
+      src={portrait.src}
+      alt={portrait.alt}
+      width={portrait.width}
+      height={portrait.height}
+      class:list={['portrait', `portrait--${size}`]}
+      loading={loading}
+      decoding="async"
+    />
+  ) : (
+    fallback && (
+      <div class:list={['monogram', `monogram--${size}`]} aria-hidden="true">
+        <span class="monogram__initials">{initials}</span>
+        <span class="monogram__nick serif">({site.nickname})</span>
+        <svg class="monogram__orbit" viewBox="0 0 400 400" fill="none">
+          <circle cx="200" cy="200" r="180" stroke="#2B2F2B" />
+          <circle cx="200" cy="200" r="180" stroke="#D5F78B" stroke-opacity="0.4" stroke-dasharray="2 12" />
+          <circle cx="380" cy="200" r="4" fill="#D5F78B" />
+          <circle cx="73" cy="327" r="3" fill="#B0B5B0" />
+        </svg>
+      </div>
+    )
+  )
+}
+
+<style>
+  .portrait {
+    width: 100%;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .portrait--panel {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-lg);
+  }
+
+  .portrait--hero {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    box-shadow: 0 0 0 6px var(--bg), 0 0 0 7px var(--accent-line);
+  }
+
+  .monogram {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(90% 70% at 90% 0%, rgba(213, 247, 139, 0.1), transparent 60%),
+      linear-gradient(160deg, #181c18, #111411);
+    overflow: hidden;
+  }
+
+  .monogram__initials {
+    font-size: clamp(5rem, 14vw, 9rem);
+    font-weight: 600;
+    letter-spacing: -0.06em;
+    line-height: 0.9;
+  }
+
+  .monogram__nick {
+    margin-top: var(--space-2);
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--accent);
+  }
+
+  .monogram__orbit {
+    position: absolute;
+    top: -20%;
+    right: -30%;
+    width: 110%;
+    height: auto;
+    pointer-events: none;
+  }
+</style>

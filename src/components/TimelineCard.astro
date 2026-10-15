@@ -1,0 +1,162 @@
+---
+/**
+ * One education / work / leadership entry from `site.ts`. Every field other
+ * than title and organization is optional and only rendered when present.
+ */
+import ExternalLink from './ExternalLink.astro';
+import Icon from './Icon.astro';
+
+/** Structural copy of `TimelineEntry` that also accepts `as const` (readonly) config data. */
+interface Entry {
+  readonly title: string;
+  readonly organization: string;
+  readonly location?: string;
+  readonly period?: string;
+  readonly description?: string;
+  readonly contributions?: readonly string[];
+  readonly technologies?: readonly string[];
+  readonly evidenceLinks?: readonly { readonly label: string; readonly url: string }[];
+}
+
+interface Props {
+  entry: Entry;
+  headingLevel?: 'h3' | 'h4';
+}
+
+const { entry, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const contributions = entry.contributions ?? [];
+const technologies = entry.technologies ?? [];
+const links = entry.evidenceLinks ?? [];
+---
+
+<article class="entry">
+  <header class="entry__head">
+    <div class="entry__id">
+      <Heading class="entry__title">{entry.title}</Heading>
+      <p class="entry__org">
+        {entry.organization}
+        {entry.location && <span class="entry__loc"> · {entry.location}</span>}
+      </p>
+    </div>
+    {entry.period && <p class="entry__period mono">{entry.period}</p>}
+  </header>
+  {entry.description && <p class="entry__desc">{entry.description}</p>}
+  {
+    contributions.length > 0 && (
+      <ul class="entry__bullets" aria-label="Contributions">
+        {contributions.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    technologies.length > 0 && (
+      <ul class="tags" aria-label="Technologies">
+        {technologies.map((tech) => (
+          <li class="tag">{tech}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    links.length > 0 && (
+      <ul class="entry__links" aria-label="Evidence">
+        {links.map((link) => (
+          <li>
+            <ExternalLink href={link.url} class="textlink entry__link">
+              {link.label} <Icon name={link.url.startsWith('/') ? 'arrow-right' : 'arrow-up-right'} size={16} class="arrow" />
+            </ExternalLink>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</article>
+
+<style>
+  .entry {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .entry__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .entry__id {
+    min-width: 0;
+  }
+
+  .entry__title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .entry__org {
+    margin-top: var(--space-1);
+    color: var(--text-muted);
+  }
+
+  .entry__loc {
+    color: var(--text-faint);
+  }
+
+  .entry__period {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .entry__desc {
+    color: var(--text-muted);
+    line-height: var(--leading-relaxed);
+    max-width: 62ch;
+  }
+
+  .entry__bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    color: var(--text-muted);
+    max-width: 62ch;
+  }
+
+  .entry__bullets li {
+    display: grid;
+    grid-template-columns: 10px 1fr;
+    gap: var(--space-3);
+  }
+
+  .entry__bullets li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 0.6em;
+  }
+
+  .entry__links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+
+  .entry__links :global(.entry__link) {
+    font-size: var(--text-sm);
+    min-height: 32px;
+  }
+</style>

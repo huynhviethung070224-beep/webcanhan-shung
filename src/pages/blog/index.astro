@@ -1,13 +1,16 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
+import FilterBar from '../../components/FilterBar.astro';
 import Icon from '../../components/Icon.astro';
-import { getPosts, formatDate, readingTime } from '../../utils/content';
+import { getPublishedPosts, formatDate, postSearchText, readingTime } from '../../utils/content';
+import { facetOptions } from '../../utils/filters';
 
-const posts = await getPosts();
+const posts = await getPublishedPosts();
 const title = 'Blog';
 const description =
   'Articles by Huynh Viet Hung (Ian) about learning, data, software, project decisions, and internship reflections.';
+const tagOptions = facetOptions(posts.map((post) => post.data.tags));
 ---
 
 <BaseLayout title={title} description={description} ogKey="blog">
@@ -37,30 +40,70 @@ const description =
             </div>
           </div>
         ) : (
-          <ol class="posts">
-            {posts.map((post, i) => (
-              <li class="post reveal" style={`--reveal-delay:${Math.min(i, 5) * 60}ms`}>
-                <a href={`/blog/${post.id}`} class="post__link">
-                  <p class="post__meta mono">
-                    <time datetime={post.data.publishedAt.toISOString()}>{formatDate(post.data.publishedAt)}</time>
-                    <span aria-hidden="true">·</span>
-                    <span>{readingTime(post.body).minutes} min read</span>
-                  </p>
-                  <h2 class="post__title">
-                    {post.data.title} <Icon name="arrow-right" size={20} class="arrow" />
-                  </h2>
-                  <p class="post__desc muted">{post.data.description}</p>
-                  {post.data.tags.length > 0 && (
-                    <ul class="tags" aria-label="Tags">
-                      {post.data.tags.map((t) => (
-                        <li class="tag">{t}</li>
-                      ))}
-                    </ul>
-                  )}
-                </a>
-              </li>
-            ))}
-          </ol>
+          <>
+            {posts.length > 1 && (
+              <div class="filters-wrap">
+                <FilterBar
+                  scope="posts"
+                  searchLabel="Search articles"
+                  placeholder="Title, topic, or tag"
+                  facets={[{ name: 'tag', label: 'Tags', options: tagOptions }]}
+                  noun={{ one: 'article', many: 'articles' }}
+                  total={posts.length}
+                />
+              </div>
+            )}
+            <div class="empty-state no-match" data-filter-empty="posts" hidden>
+              <p class="empty-state__title">No articles match these filters.</p>
+              <p class="muted">Try another word or tag, or clear the filters to see every article.</p>
+              <button type="button" class="btn btn--ghost btn--sm" data-filter-reset="posts">
+                Reset filters
+              </button>
+            </div>
+            <ol class="posts" data-filter-group="posts">
+              {posts.map((post, i) => (
+                <li
+                  class:list={['post reveal', { 'post--cover': post.data.cover }]}
+                  style={`--reveal-delay:${Math.min(i, 5) * 60}ms`}
+                  data-filter-item="posts"
+                  data-filter-text={postSearchText(post)}
+                  data-filter-tag={post.data.tags.join('|')}
+                >
+                  <a href={`/blog/${post.id}`} class="post__link">
+                    <div class="post__text">
+                      <p class="post__meta mono">
+                        <time datetime={post.data.publishedAt.toISOString()}>{formatDate(post.data.publishedAt)}</time>
+                        <span aria-hidden="true">·</span>
+                        <span>{readingTime(post.body).minutes} min read</span>
+                      </p>
+                      <h2 class="post__title">
+                        {post.data.title} <Icon name="arrow-right" size={20} class="arrow" />
+                      </h2>
+                      <p class="post__desc muted">{post.data.description}</p>
+                      {post.data.tags.length > 0 && (
+                        <ul class="tags" aria-label="Tags">
+                          {post.data.tags.map((t) => (
+                            <li class="tag">{t}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    {post.data.cover && (
+                      <img
+                        class="post__cover"
+                        src={post.data.cover.src}
+                        alt=""
+                        width={post.data.cover.width}
+                        height={post.data.cover.height}
+                        loading={i < 2 ? 'eager' : 'lazy'}
+                        decoding="async"
+                      />
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </>
         )
       }
     </div>
@@ -94,6 +137,15 @@ const description =
     margin-top: var(--space-2);
   }
 
+  .filters-wrap {
+    max-width: calc(var(--prose-width) + 8rem);
+    margin-bottom: var(--space-7);
+  }
+
+  .no-match {
+    margin-bottom: var(--space-7);
+  }
+
   .posts {
     list-style: none;
     max-width: calc(var(--prose-width) + 8rem);
@@ -105,15 +157,38 @@ const description =
   }
 
   .post__link {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+    display: grid;
+    gap: var(--space-5);
     padding-block: var(--space-6);
     text-decoration: none;
   }
 
+  @media (min-width: 720px) {
+    .post--cover .post__link {
+      grid-template-columns: minmax(0, 1fr) 220px;
+      align-items: center;
+    }
+  }
+
+  .post__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .post__cover {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
   .post__meta {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-2);
     color: var(--text-muted);
   }
@@ -129,6 +204,7 @@ const description =
   .post__title .arrow {
     color: var(--accent);
     transition: transform var(--dur-hover) var(--ease-out);
+    flex: none;
   }
 
   .post__link:hover .post__title {

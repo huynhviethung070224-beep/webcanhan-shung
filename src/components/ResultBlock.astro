@@ -1,0 +1,119 @@
+---
+/**
+ * One entry of a project's `results[]`: a factual table (e.g. real SQL output)
+ * in its own scroll region, or an evidence image that opens in the lightbox.
+ */
+import type { ProjectData } from '../schemas/content';
+import Gallery from './Gallery.astro';
+
+interface Props {
+  result: ProjectData['results'][number];
+  group: string;
+}
+
+const { result, group } = Astro.props;
+---
+
+{
+  result.type === 'table' ? (
+    <figure class="result">
+      <div class="result__scroll" role="region" aria-label={result.title} tabindex="0">
+        <table>
+          <caption>{result.title}</caption>
+          <thead>
+            <tr>
+              {result.columns.map((column) => (
+                <th scope="col">{column}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {result.rows.map((row) => (
+              <tr>
+                {row.map((cell) => (
+                  <td>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {result.note && <figcaption>{result.note}</figcaption>}
+    </figure>
+  ) : (
+    <div class="result">
+      {result.title && <h3 class="result__title">{result.title}</h3>}
+      <Gallery
+        items={[{ src: result.src, alt: result.alt, width: result.width, height: result.height, caption: result.caption }]}
+        group={group}
+        layout="wide"
+      />
+    </div>
+  )
+}
+
+<style>
+  .result {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .result__title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .result__scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    max-width: 100%;
+  }
+
+  table {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  caption {
+    text-align: left;
+    padding: 0.75rem 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+    color: var(--text);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+
+  td {
+    color: var(--text-muted);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  figcaption {
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+  }
+</style>

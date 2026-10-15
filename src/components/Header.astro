@@ -10,7 +10,7 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
 
 <header class="site-header" data-header>
   <div class="container site-header__inner">
-    <a href="/" class="brand" aria-label={`${site.displayName} — Home`}>
+    <a href="/" class="brand" aria-label={`${site.displayName} — Home`} aria-current={current === '/' ? 'page' : undefined}>
       <BrandMark size={30} />
       <span class="brand__name">
         <span class="brand__full">{site.fullName}</span>
@@ -88,14 +88,23 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
     top: 0;
     z-index: 50;
     height: var(--header-height);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* The blur lives on a pseudo-element: backdrop-filter on the header itself would make it
+     the containing block for the fixed mobile menu, clipping the menu to the header in Safari. */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: color-mix(in srgb, var(--bg) 82%, transparent);
     backdrop-filter: saturate(140%) blur(12px);
     -webkit-backdrop-filter: saturate(140%) blur(12px);
-    border-bottom: 1px solid var(--border);
     transition: background var(--dur-hover) var(--ease-out);
   }
 
-  .site-header.is-scrolled {
+  .site-header.is-scrolled::before {
     background: color-mix(in srgb, var(--bg) 97%, #000);
   }
 
@@ -296,6 +305,10 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
 </style>
 
 <script>
+  import { bindOnce, onPageReady } from '../scripts/lifecycle';
+
+  let closeMenu: (() => void) | undefined;
+
   function setupMenu() {
     const header = document.querySelector<HTMLElement>('[data-header]');
     if (!header || header.dataset.menuReady) return;
@@ -313,10 +326,7 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
         panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
       );
 
-    let lastFocused: HTMLElement | null = null;
-
     const open = () => {
-      lastFocused = document.activeElement as HTMLElement | null;
       menu.hidden = false;
       openBtn.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
@@ -324,13 +334,17 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
       document.addEventListener('keydown', onKey);
     };
 
-    const close = () => {
+    const close = (restoreFocus = true) => {
+      if (menu.hidden) return;
       menu.hidden = true;
       openBtn.setAttribute('aria-expanded', 'false');
+      openBtn.setAttribute('aria-label', 'Open menu');
       document.body.style.overflow = '';
       document.removeEventListener('keydown', onKey);
-      (lastFocused ?? openBtn).focus();
+      // Safari does not focus buttons on click, so return focus to the trigger explicitly.
+      if (restoreFocus) openBtn.focus();
     };
+    closeMenu = () => close(false);
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -339,42 +353,42 @@ const isActive = (href: string) => current === href || current.startsWith(`${hre
         return;
       }
       if (e.key === 'Tab') {
+        // Move focus explicitly: Safari's default Tab order skips links and would leave the dialog.
         const items = focusable();
         if (items.length === 0) return;
-        const first = items[0]!;
-        const last = items[items.length - 1]!;
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
+        e.preventDefault();
+        const current = items.indexOf(document.activeElement as HTMLElement);
+        const next = current === -1 ? 0 : (current + (e.shiftKey ? -1 : 1) + items.length) % items.length;
+        items[next]!.focus();
       }
     };
 
     openBtn.addEventListener('click', open);
-    closeBtn.addEventListener('click', close);
-    backdrop?.addEventListener('click', close);
+    closeBtn.addEventListener('click', () => close());
+    backdrop?.addEventListener('click', () => close());
     menu.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('a')) close();
+      const link = (e.target as HTMLElement).closest('a');
+      if (!link) return;
+      // Current page: close and stay. Other pages: close without stealing focus from the navigation.
+      close(link.getAttribute('aria-current') === 'page');
     });
 
     const mq = window.matchMedia('(min-width: 900px)');
     mq.addEventListener('change', () => {
-      if (mq.matches && !menu.hidden) close();
+      if (mq.matches) close(false);
     });
   }
 
-  setupMenu();
+  const onScroll = () =>
+    document.querySelector<HTMLElement>('[data-header]')?.classList.toggle('is-scrolled', window.scrollY > 8);
 
-  const scrolledHeader = document.querySelector<HTMLElement>('[data-header]');
-  const onScroll = () => scrolledHeader?.classList.toggle('is-scrolled', window.scrollY > 8);
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
-  // Re-bind after bfcache restores.
-  window.addEventListener('pageshow', (e) => {
-    if (e.persisted) {
+  bindOnce('header-scroll', () => window.addEventListener('scroll', onScroll, { passive: true }));
+
+  onPageReady(({ restored }) => {
+    setupMenu();
+    onScroll();
+    if (restored) {
+      closeMenu?.();
       document.body.style.overflow = '';
     }
   });

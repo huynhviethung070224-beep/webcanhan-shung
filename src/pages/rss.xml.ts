@@ -1,14 +1,14 @@
 import rss from '@astrojs/rss';
 import type { APIRoute } from 'astro';
 import { site } from '../config/site';
-import { getPosts } from '../utils/content';
+import { getPublishedPosts } from '../utils/content';
 
 /**
  * RSS feed of published articles. Returns 404 while there are no posts so the
  * feed is only discoverable once genuine content exists.
  */
 export const GET: APIRoute = async (context) => {
-  const posts = await getPosts();
+  const posts = await getPublishedPosts();
   if (posts.length === 0) {
     return new Response(null, { status: 404 });
   }

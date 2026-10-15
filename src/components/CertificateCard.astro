@@ -1,0 +1,123 @@
+---
+/**
+ * Certificate from `src/config/portfolio.ts`. Issuer, date, credential ID,
+ * image/PDF evidence and the Verify action only render when configured; an
+ * uploaded file is never presented as issuer verification.
+ */
+import type { Certificate } from '../config/portfolio';
+import ExternalLink from './ExternalLink.astro';
+import Icon from './Icon.astro';
+import { publicImageSize } from '../utils/image-size';
+
+interface Props {
+  certificate: Certificate;
+}
+
+const { certificate: c } = Astro.props;
+const meta = [c.issuer, c.issuedAt ? `Issued ${c.issuedAt}` : undefined].filter(Boolean);
+const hasActions = Boolean(c.verificationUrl || c.asset);
+const size = c.asset?.type === 'image' ? publicImageSize(c.asset.src) : undefined;
+---
+
+<article class:list={['cert', { 'cert--media': c.asset?.type === 'image' }]}>
+  {
+    c.asset?.type === 'image' && (
+      <a
+        href={c.asset.src}
+        class="cert__thumb"
+        data-lightbox
+        data-lightbox-group="certificates"
+        data-caption={c.title}
+        data-alt={c.asset.alt}
+        aria-label={`Open larger image: ${c.asset.alt}`}
+      >
+        <img src={c.asset.src} alt={c.asset.alt} width={size?.width} height={size?.height} loading="lazy" decoding="async" />
+      </a>
+    )
+  }
+  <div class="cert__body">
+    <h3 class="cert__title">{c.title}</h3>
+    {meta.length > 0 && <p class="cert__meta">{meta.join(' · ')}</p>}
+    {c.credentialId && <p class="cert__id mono">Credential ID {c.credentialId}</p>}
+    {
+      hasActions && (
+        <div class="cert__actions">
+          {c.verificationUrl && (
+            <ExternalLink href={c.verificationUrl} class="btn btn--ghost btn--sm">
+              <Icon name="verified" size={16} /> Verify Credential
+            </ExternalLink>
+          )}
+          {c.asset?.type === 'pdf' && (
+            <ExternalLink href={c.asset.src} class="btn btn--ghost btn--sm">
+              <Icon name="file" size={16} /> View certificate <span class="visually-hidden">(PDF)</span>
+            </ExternalLink>
+          )}
+        </div>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .cert {
+    display: grid;
+    gap: var(--space-4);
+    height: 100%;
+    padding: var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+  }
+
+  @media (min-width: 560px) {
+    .cert--media {
+      grid-template-columns: 120px minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .cert__thumb {
+    display: block;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #0e100e;
+  }
+
+  .cert__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cert__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .cert__title {
+    font-size: var(--text-base);
+    font-weight: 600;
+  }
+
+  .cert__meta {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .cert__id {
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    overflow-wrap: anywhere;
+  }
+
+  .cert__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+</style>

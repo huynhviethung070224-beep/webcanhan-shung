@@ -5,6 +5,8 @@ import '../styles/global.css';
 import Seo from '../components/Seo.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { site } from '../config/site';
+import { getPublishedPosts } from '../utils/content';
 
 interface Props {
   title?: string;
@@ -19,6 +21,8 @@ interface Props {
 }
 
 const { bodyClass, ...seo } = Astro.props;
+// /rss.xml is only emitted once a post is published; advertise it only then.
+const hasFeed = (await getPublishedPosts()).length > 0;
 ---
 
 <!doctype html>
@@ -27,8 +31,11 @@ const { bodyClass, ...seo } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#111411" />
+    <!-- Chromium skips cross-document transitions when this opt-in lives only in an external stylesheet and the page also loads external module scripts. -->
+    <style is:inline>@view-transition { navigation: auto; }</style>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    {hasFeed && <link rel="alternate" type="application/rss+xml" title={`${site.displayName} — Blog`} href="/rss.xml" />}
     <meta name="generator" content={Astro.generator} />
     <Seo {...seo} />
     <slot name="head" />

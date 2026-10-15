@@ -2,13 +2,20 @@
  * One-time section reveals. Content is fully visible without JS; with JS the
  * `.reveal` elements fade/slide in once as they enter the viewport.
  * Respects prefers-reduced-motion by revealing everything immediately.
+ * A CSS animation in global.css also reveals everything if this never runs.
  */
-const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const items = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+import { onPageReady } from './lifecycle';
 
-if (reduced || !('IntersectionObserver' in window)) {
-  items.forEach((el) => el.classList.add('is-visible'));
-} else {
+onPageReady(() => {
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.reveal:not(.is-visible)'));
+  if (items.length === 0) return;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || !('IntersectionObserver' in window)) {
+    items.forEach((el) => el.classList.add('is-visible'));
+    return;
+  }
+
   const io = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -20,16 +27,21 @@ if (reduced || !('IntersectionObserver' in window)) {
     },
     { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
   );
+
   items.forEach((el) => {
     // Elements already in view on load reveal immediately to avoid a blank first screen.
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.9) {
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.9) {
       el.classList.add('is-visible');
     } else {
       io.observe(el);
     }
   });
-}
 
-// Safety net: never leave content hidden.
-window.setTimeout(() => items.forEach((el) => el.classList.add('is-visible')), 2500);
+  // Safety net: never leave content hidden.
+  const timer = window.setTimeout(() => items.forEach((el) => el.classList.add('is-visible')), 2500);
+
+  return () => {
+    io.disconnect();
+    window.clearTimeout(timer);
+  };
+});

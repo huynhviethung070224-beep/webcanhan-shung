@@ -8,9 +8,17 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "validate:content": "node --no-warnings --experimental-strip-types scripts/validate-content-foundation.ts",
+    "fixture:ui": "node scripts/ui-fixture/build.mjs",
+    "test": "npm run validate:content && npm run test:unit && npm run test:build && npm run test:e2e",
+    "test:unit": "node --no-warnings --experimental-strip-types --test \"tests/unit/**/*.test.ts\"",
+    "test:build": "node --test --test-concurrency=1 \"tests/build/**/*.test.mjs\"",
+    "test:e2e": "astro build && node scripts/ui-fixture/build.mjs full && node scripts/ui-fixture/build.mjs sparse && playwright test",
+    "test:links": "node scripts/check-external-links.mjs",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "^0.4.2",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/manrope": "^5.3.0",
@@ -19,7 +27,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
     "@fontsource/manrope": "^5.3.0",
+    "@playwright/test": "^1.64.1",
     "@resvg/resvg-js": "^2.6.2",
     "satori": "^0.35.0",
     "typescript": "^5.9.0"

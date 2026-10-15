@@ -1,0 +1,85 @@
+---
+/**
+ * Internship / co-op availability from `site.availability`.
+ * Shows only configured fields and renders nothing while the record is `null`,
+ * so the site never implies availability the owner has not confirmed.
+ */
+import { site } from '../config/site';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const a = site.availability;
+const roles = a?.roles?.filter(Boolean) ?? [];
+const headline =
+  a?.seeking === true
+    ? ['Open to', roles.length > 0 ? roles.join(' · ') : 'internship and co-op roles'].join(' ')
+    : roles.length > 0
+      ? `Interested in ${roles.join(' · ')}`
+      : undefined;
+const start = a?.startDate ? `Available from ${a.startDate}` : undefined;
+const hasContent = Boolean(headline || start || a?.note);
+---
+
+{
+  a && hasContent && (
+    <div class:list={['availability', { 'availability--open': a.seeking === true }, className]}>
+      {(headline || start) && (
+        <p class="availability__line">
+          {a.seeking === true && <span class="availability__dot" aria-hidden="true" />}
+          {headline && <span class="availability__headline">{headline}</span>}
+          {headline && start && <span aria-hidden="true">·</span>}
+          {start && <span class="availability__start">{start}</span>}
+        </p>
+      )}
+      {a.note && <p class="availability__note">{a.note}</p>}
+    </div>
+  )
+}
+
+<style>
+  .availability {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    max-width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+  }
+
+  .availability--open {
+    border-color: var(--accent-line);
+  }
+
+  .availability__line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .availability__start {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .availability__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  .availability__note {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+</style>

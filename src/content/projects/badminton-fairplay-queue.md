@@ -8,6 +8,7 @@ technologies:
   - React
   - Supabase
   - PostgreSQL
+category: Web app
 cover: orbit
 coverAlt: Screenshot of Badminton FairPlay Queue showing three courts at the Drexel Badminton Club.
 coverFrame: browser
@@ -20,6 +21,15 @@ coverImage:
 purpose: Run a fair waiting list and three courts for a small badminton club.
 demoUrl: https://badminton.drexel-queue.workers.dev/
 repoUrl: https://github.com/huynhviethung070224-beep/queue-
+# Demo slot — uncomment once a real recording exists. Keep the file in
+# public/projects/badminton-fairplay-queue/ (or use an HTTPS YouTube/Vimeo URL).
+# demoStatus: State, in your own words, when the live demo has an active club session.
+# media:
+#   - type: video
+#     src: /projects/badminton-fairplay-queue/demo.mp4
+#     title: Walkthrough of a club night
+#     poster: /projects/badminton-fairplay-queue/court-desktop.png
+#     caption: Recorded on a test club, not a real session.
 gallery:
   - src: /projects/badminton-fairplay-queue/court-mobile.png
     alt: Phone screenshot of Badminton FairPlay Queue with the queue closed and three courts available.
@@ -28,7 +38,7 @@ gallery:
     height: 900
     frame: browser
 order: 3
-featured: false
+featured: true
 ---
 
 ## Overview

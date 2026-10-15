@@ -1,6 +1,6 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { site } from '../../config/site';
-import { getPosts, getProjects } from '../../utils/content';
+import { getPublishedPosts, getProjects } from '../../utils/content';
 import { renderOgImage, type OgInput } from '../../utils/og';
 
 /**
@@ -27,7 +27,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     });
   }
 
-  for (const post of await getPosts()) {
+  for (const post of await getPublishedPosts()) {
     paths.push({
       params: { key: `blog/${post.id}` },
       props: { input: { kind: 'Article', title: post.data.title, subtitle: post.data.description } },

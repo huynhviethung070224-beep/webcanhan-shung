@@ -24,6 +24,9 @@ const { post, headings, related = [] } = Astro.props;
 const { data } = post;
 const time = readingTime(post.body);
 const url = absoluteUrl(Astro.url.pathname, Astro.site);
+/** A table of contents only helps once an article is long enough to navigate. */
+const TOC_MIN_MINUTES = 3;
+const tocMin = time.minutes >= TOC_MIN_MINUTES ? 3 : Number.POSITIVE_INFINITY;
 ---
 
 <BaseLayout
@@ -63,7 +66,11 @@ const url = absoluteUrl(Astro.url.pathname, Astro.site);
           data.tags.length > 0 && (
             <ul class="tags" aria-label="Tags">
               {data.tags.map((t) => (
-                <li class="tag">{t}</li>
+                <li>
+                  <a class="tag tag--link" href={`/blog?tag=${encodeURIComponent(t)}`} aria-label={`More articles tagged ${t}`}>
+                    {t}
+                  </a>
+                </li>
               ))}
             </ul>
           )
@@ -90,14 +97,17 @@ const url = absoluteUrl(Astro.url.pathname, Astro.site);
 
     <div class="container article__body">
       <aside class="article__aside">
-        <TableOfContents headings={headings} min={3} />
+        <TableOfContents headings={headings} min={tocMin} />
         <div class="article__actions">
           <CopyButton value={url} label="Copy article link" successLabel="Link copied" useLocation />
         </div>
       </aside>
 
-      <div class="prose article__prose" data-article-content>
-        <slot />
+      <div class="article__main">
+        <TableOfContents headings={headings} min={tocMin} variant="inline" />
+        <div class="prose article__prose" data-article-content>
+          <slot />
+        </div>
       </div>
     </div>
 
@@ -111,7 +121,7 @@ const url = absoluteUrl(Astro.url.pathname, Astro.site);
       {
         related.length > 0 && (
           <div class="container related">
-            <p class="eyebrow">Related articles</p>
+            <h2 class="eyebrow related__heading">Related articles</h2>
             <ul class="related__list">
               {related.map((r) => (
                 <li>
@@ -133,9 +143,12 @@ const url = absoluteUrl(Astro.url.pathname, Astro.site);
     import '../scripts/prose-enhance';
   </script>
   <script>
-    const bar = document.querySelector<HTMLElement>('[data-progress]');
-    const content = document.querySelector<HTMLElement>('[data-article-content]');
-    if (bar && content) {
+    import { onPageReady } from '../scripts/lifecycle';
+
+    onPageReady(() => {
+      const bar = document.querySelector<HTMLElement>('[data-progress]');
+      const content = document.querySelector<HTMLElement>('[data-article-content]');
+      if (!bar || !content) return;
       let ticking = false;
       const update = () => {
         const rect = content.getBoundingClientRect();
@@ -145,18 +158,20 @@ const url = absoluteUrl(Astro.url.pathname, Astro.site);
         bar.style.transform = `scaleX(${pct / 100})`;
         ticking = false;
       };
-      window.addEventListener(
-        'scroll',
-        () => {
-          if (!ticking) {
-            ticking = true;
-            requestAnimationFrame(update);
-          }
-        },
-        { passive: true },
-      );
+      const onScroll = () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
       update();
-    }
+      return () => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+      };
+    });
   </script>
 </BaseLayout>
 
@@ -242,18 +257,35 @@ const url = absoluteUrl(Astro.url.pathname, Astro.site);
     }
   }
 
-  @media (max-width: 959px) {
-    .article__aside :global(.toc) {
-      display: none;
-    }
-  }
-
   .article__actions {
     margin-top: var(--space-5);
   }
 
+  .article__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
   .article__prose {
     min-width: 0;
+  }
+
+  .tag--link {
+    text-decoration: none;
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
+  }
+
+  .tag--link:hover {
+    color: var(--accent);
+    border-color: var(--accent-line);
+  }
+
+  .related__heading {
+    font-weight: 400;
   }
 
   .article__foot {

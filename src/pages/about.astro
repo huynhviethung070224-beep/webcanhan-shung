@@ -2,14 +2,18 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import Icon from '../components/Icon.astro';
+import Portrait from '../components/Portrait.astro';
+import Availability from '../components/Availability.astro';
 import { site } from '../config/site';
 
 const title = 'About Me';
 const description = `${site.displayName} is a Data Science student at Drexel University from Vietnam, interested in data, software development, and AI.`;
-const initials = site.fullName
-  .split(' ')
-  .map((w) => w[0])
-  .join('');
+const byOrder = <T extends { order: number }>(items: readonly T[]) => [...items].sort((a, b) => a.order - b.order);
+const timelineGroups = [
+  { id: 'tl-education', label: 'Education', entries: byOrder(site.education) },
+  { id: 'tl-work', label: 'Work experience', entries: byOrder(site.workExperience) },
+  { id: 'tl-leadership', label: 'Leadership & activities', entries: byOrder(site.leadership) },
+].filter((group) => group.entries.length > 0);
 ---
 
 <BaseLayout title={title} description={description} ogKey="about">
@@ -22,30 +26,8 @@ const initials = site.fullName
   <section class="section">
     <div class="container about">
       <div class="about__visual reveal">
-        {
-          site.portrait ? (
-            <img
-              src={site.portrait.src}
-              alt={site.portrait.alt}
-              width={site.portrait.width}
-              height={site.portrait.height}
-              class="about__portrait"
-              loading="eager"
-              decoding="async"
-            />
-          ) : (
-            <div class="monogram" aria-hidden="true">
-              <span class="monogram__initials">{initials}</span>
-              <span class="monogram__nick serif">({site.nickname})</span>
-              <svg class="monogram__orbit" viewBox="0 0 400 400" fill="none">
-                <circle cx="200" cy="200" r="180" stroke="#2B2F2B" />
-                <circle cx="200" cy="200" r="180" stroke="#D5F78B" stroke-opacity="0.4" stroke-dasharray="2 12" />
-                <circle cx="380" cy="200" r="4" fill="#D5F78B" />
-                <circle cx="73" cy="327" r="3" fill="#B0B5B0" />
-              </svg>
-            </div>
-          )
-        }
+        <Portrait loading="eager" />
+        <Availability class="about__availability" />
         <dl class="about__facts">
           <div>
             <dt class="mono">Studying</dt>
@@ -98,37 +80,36 @@ const initials = site.fullName
         </section>
 
         <section class="about__block reveal" aria-labelledby="timeline-title">
-          <h2 id="timeline-title">Education and experience</h2>
-          <ol class="timeline">
-            {
-              site.education.map((item) => (
-                <li class="timeline__item">
-                  <span class="timeline__marker" aria-hidden="true" />
-                  <div>
-                    <p class="timeline__head">
-                      <span class="timeline__title">{item.institution}</span>
-                      {item.period && <span class="mono muted">{item.period}</span>}
-                    </p>
-                    <p class="muted">{item.detail}</p>
-                  </div>
-                </li>
-              ))
-            }
-            {
-              site.experience.map((item) => (
-                <li class="timeline__item">
-                  <span class="timeline__marker" aria-hidden="true" />
-                  <div>
-                    <p class="timeline__head">
-                      <span class="timeline__title">{item.title}</span>
-                      {item.period && <span class="mono muted">{item.period}</span>}
-                    </p>
-                    <p class="muted">{item.detail}</p>
-                  </div>
-                </li>
-              ))
-            }
-          </ol>
+          <h2 id="timeline-title">Education, experience, and leadership</h2>
+          {
+            timelineGroups.map((group) => (
+              <div class="timeline-group">
+                <h3 id={group.id} class="timeline-group__title mono">
+                  {group.label}
+                </h3>
+                <ol class="timeline">
+                  {group.entries.map((item) => (
+                    <li class="timeline__item">
+                      <span class="timeline__marker" aria-hidden="true" />
+                      <div>
+                        <p class="timeline__head">
+                          <span class="timeline__title">
+                            {item.title} · {item.organization}
+                          </span>
+                          {item.period && <span class="mono muted">{item.period}</span>}
+                        </p>
+                        {item.location && <p class="muted timeline__loc">{item.location}</p>}
+                        {item.description && <p class="muted">{item.description}</p>}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))
+          }
+          <a href="/portfolio" class="textlink timeline__more">
+            Details, contributions, and evidence on Portfolio <Icon name="arrow-right" size={16} class="arrow" />
+          </a>
         </section>
 
         <section class="about__block reveal" aria-labelledby="beyond-title">
@@ -168,49 +149,8 @@ const initials = site.fullName
     }
   }
 
-  .about__portrait {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-  }
-
-  .monogram {
-    position: relative;
-    aspect-ratio: 4 / 5;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: var(--space-6);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    background:
-      radial-gradient(90% 70% at 90% 0%, rgba(213, 247, 139, 0.1), transparent 60%),
-      linear-gradient(160deg, #181c18, #111411);
-    overflow: hidden;
-  }
-
-  .monogram__initials {
-    font-size: clamp(5rem, 14vw, 9rem);
-    font-weight: 600;
-    letter-spacing: -0.06em;
-    line-height: 0.9;
-  }
-
-  .monogram__nick {
-    margin-top: var(--space-2);
-    font-size: clamp(2rem, 5vw, 3rem);
-    color: var(--accent);
-  }
-
-  .monogram__orbit {
-    position: absolute;
-    top: -20%;
-    right: -30%;
-    width: 110%;
-    height: auto;
-    pointer-events: none;
+  :global(.about__availability) {
+    margin-top: var(--space-5);
   }
 
   .about__facts {
@@ -258,14 +198,38 @@ const initials = site.fullName
     line-height: var(--leading-relaxed);
   }
 
-  .about__block a:not(.btn) {
+  .about__block a:not(.btn):not(.textlink) {
     color: var(--text);
     text-decoration: underline;
     text-decoration-color: var(--accent-line);
   }
 
-  .about__block a:not(.btn):hover {
+  .about__block a:not(.btn):not(.textlink):hover {
     color: var(--accent);
+  }
+
+  .timeline-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  .timeline-group__title {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--text-faint);
+  }
+
+  .timeline__loc {
+    font-size: var(--text-sm);
+  }
+
+  .timeline__more {
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
   }
 
   .timeline {

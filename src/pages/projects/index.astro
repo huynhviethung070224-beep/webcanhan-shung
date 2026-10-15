@@ -2,30 +2,67 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHead from '../../components/PageHead.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
+import FilterBar from '../../components/FilterBar.astro';
 import Icon from '../../components/Icon.astro';
-import { getProjects } from '../../utils/content';
+import { site } from '../../config/site';
+import { getProjects, projectSearchText } from '../../utils/content';
+import { facetOptions } from '../../utils/filters';
+import { countWord, listJoin, plural } from '../../utils/format';
 
 const projects = await getProjects();
 const primary = projects.filter((project) => !project.data.earlier);
 const earlier = projects.filter((project) => project.data.earlier);
 const title = 'Projects';
-const description =
-  'Projects by Huynh Viet Hung (Ian): DragonGo, a campus navigation app; a PostgreSQL library database; and Badminton FairPlay Queue.';
+const description = `Projects by ${site.displayName}: ${listJoin(projects.map((p) => p.data.title))}.`;
+const lead = [
+  `${countWord(primary.length, true)} ${plural(primary.length, 'case study', 'case studies')} with a role, a stack, and what I actually built.`,
+  earlier.length > 0 ? `Earlier practice ${plural(earlier.length, 'sits', 'sit')} below.` : '',
+]
+  .filter(Boolean)
+  .join(' ');
+
+const facets = [
+  { name: 'category', label: 'Category', options: facetOptions(projects.map((p) => (p.data.category ? [p.data.category] : []))) },
+  { name: 'tech', label: 'Technology', options: facetOptions(projects.map((p) => p.data.technologies)) },
+];
+const filterAttrs = (project: (typeof projects)[number]) => ({
+  'data-filter-item': 'projects',
+  'data-filter-text': projectSearchText(project),
+  'data-filter-category': project.data.category ?? '',
+  'data-filter-tech': project.data.technologies.join('|'),
+});
 ---
 
 <BaseLayout title={title} description={description} ogKey="projects">
-  <PageHead
-    eyebrow="Projects"
-    title="Products and technical case studies."
-    lead="Three case studies with a role, a stack, and what I actually built. An earlier SQL exercise sits below them."
-  />
+  <PageHead eyebrow="Projects" title="Products and technical case studies." lead={lead} />
 
-  <section class="section">
+  <section class="section" aria-label="All projects">
     <div class="container">
-      <ol class="list">
+      {
+        projects.length > 1 && (
+          <div class="filters-wrap">
+            <FilterBar
+              scope="projects"
+              searchLabel="Search projects"
+              placeholder="Title, role, or technology"
+              facets={facets}
+              noun={{ one: 'project', many: 'projects' }}
+              total={projects.length}
+            />
+          </div>
+        )
+      }
+
+      <div class="empty-state no-match" data-filter-empty="projects" hidden>
+        <p class="empty-state__title">No projects match these filters.</p>
+        <p class="muted">Try a different word or technology, or clear the filters to see every project.</p>
+        <button type="button" class="btn btn--ghost btn--sm" data-filter-reset="projects">Reset filters</button>
+      </div>
+
+      <ol class="list" data-filter-group="projects">
         {
           primary.map((project, i) => (
-            <li class="list__item reveal" style={`--reveal-delay:${i * 80}ms`}>
+            <li class="list__item reveal" style={`--reveal-delay:${Math.min(i, 3) * 80}ms`} {...filterAttrs(project)}>
               <ProjectCard project={project} index={i} layout="feature" headingLevel="h2" loading={i === 0 ? 'eager' : 'lazy'} />
             </li>
           ))
@@ -36,13 +73,13 @@ const description =
 
   {
     earlier.length > 0 && (
-      <section class="section earlier" aria-labelledby="earlier-title">
+      <section class="section earlier" aria-labelledby="earlier-title" data-filter-group="projects">
         <div class="container">
-          <p class="eyebrow">Earlier SQL practice</p>
+          <p class="eyebrow">Earlier practice</p>
           <h2 id="earlier-title" class="earlier__title">Before the larger projects</h2>
           <ul class="earlier__list">
             {earlier.map((project) => (
-              <li>
+              <li {...filterAttrs(project)}>
                 <a href={`/projects/${project.id}`} class="earlier__link">
                   <span class="earlier__name">
                     {project.data.title}
@@ -61,6 +98,14 @@ const description =
 </BaseLayout>
 
 <style>
+  .filters-wrap {
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .no-match {
+    margin-bottom: var(--space-7);
+  }
+
   .list {
     list-style: none;
     display: flex;

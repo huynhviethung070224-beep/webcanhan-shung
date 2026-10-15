@@ -13,6 +13,15 @@ Planned production origin: `https://ianhuynh.me` (domain registration/connection
 | `npm run build`   | Static build to `dist/` (also generates OG images, sitemap, robots) |
 | `npm run preview` | Serve the production build locally                |
 | `npm run check`   | Type-check `.astro` files and content schemas     |
+| `npm run validate:content` | Private schema/publication fixtures (no output) |
+| `npm run fixture:ui -- full\|sparse` | Private UI fixture build in a temp dir (see `docs/HANDOFF-CURSOR.md`) |
+| `npm test` | Everything below plus `validate:content` |
+| `npm run test:unit` | Schema, validation, filter, format, and image-size unit tests |
+| `npm run test:build` | Builds real + fixture sites, checks HTML/SEO/sitemap/RSS/privacy, and proves invalid content fails the build |
+| `npm run test:e2e` | Playwright browser tests (Chromium + WebKit). First time: `npx playwright install chromium webkit` |
+| `npm run test:links` | Checks external links in `dist/` (needs internet; separates broken links from bot-blocked sites) |
+
+QA results and the flow matrix: [`docs/QA-REPORT.md`](./docs/QA-REPORT.md).
 
 ## Pages
 
@@ -37,7 +46,7 @@ Everything an owner normally changes lives in a few files; page components only 
 
 | What                                   | File                                   |
 | -------------------------------------- | -------------------------------------- |
-| Name, introduction, tagline, facts (school, origin, interests, hobbies), education/experience entries, **contact email**, **CV path**, portrait, production origin | `src/config/site.ts` |
+| Name, introduction, facts, education/work/leadership, **contact email**, optional resume/portrait/availability, production origin | `src/config/site.ts` |
 | Social links (platform, label, exact URL, handle, icon, featured) | `src/config/social.ts` |
 | Portfolio skill groups and (future) certificates | `src/config/portfolio.ts` |
 | Projects (one Markdown file each)      | `src/content/projects/*.md`            |
@@ -61,12 +70,12 @@ contactEmail: 'you@example.com',
 
 The Contact page then shows an email block with a `mailto:` button and a copy-email action with visible feedback. Leaving it `null` hides every email action.
 
-### Attach the CV
+### Attach the resume
 
-1. Put the approved PDF in `public/cv/`, e.g. `public/cv/huynh-viet-hung-cv.pdf`.
-2. In `src/config/site.ts` set `cvPath: '/cv/huynh-viet-hung-cv.pdf'`.
+1. Put the approved PDF in `public/resume/`, e.g. `public/resume/huynh-viet-hung-resume.pdf`.
+2. In `src/config/site.ts` set `resume: { path: '/resume/huynh-viet-hung-resume.pdf', label: 'Download Resume' }`.
 
-"Download CV" buttons appear on the Portfolio page automatically. Leaving `cvPath: null` keeps the page useful without a broken button.
+The download buttons appear automatically. Leaving `resume: null` keeps the page useful without a broken button.
 
 ### Add a portrait
 
@@ -85,7 +94,7 @@ Width/height are the intrinsic pixel size (they prevent layout shift). The typog
 3. Write the case study body in Markdown using the template headings (Overview → Solution → My contribution → Technical decisions → Evidence → Lessons). Only keep sections you have real content for; `##` headings feed the table of contents.
 4. Optional, rendered only when present: `coverImage`, `demoUrl`, `repoUrl`, `period`, `teamSize`, `status`, `outcomes`, `gallery` (captioned images with zoom).
 5. Put screenshots/ERDs in `public/projects/<slug>/` and reference them with absolute paths (`/projects/<slug>/erd.png`) plus their pixel `width`/`height`.
-6. `npm run dev` and open `/projects/<slug>` to preview. Home shows projects with `featured: true`; the Next Project link follows `order`.
+6. `npm run dev` and open `/projects/<slug>` to preview. Home shows every project with `featured: true` (the first two by `order` if none are featured) and counts them in the heading; the Next Project link follows `order`. `category` and `technologies` drive the filters on `/projects`.
 
 ### Publish a blog article
 

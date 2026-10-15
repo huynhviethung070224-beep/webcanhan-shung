@@ -7,6 +7,7 @@ technologies:
   - JavaScript
   - Firebase Authentication
   - Cloud Firestore
+category: Web app
 cover: orbit
 coverAlt: DragonGo home screen with Weekly Schedule, School Tour, and See Map.
 coverFit: contain

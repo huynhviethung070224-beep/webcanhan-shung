@@ -1,50 +1,217 @@
-# Content and asset checklist
+# Content checklist
 
-What the site still needs from the owner, where it goes, and what the site shows in the meantime. Nothing below is exposed as a public TODO; every gap has a finished fallback.
+How to add real content to the site. Every module below is already built and tested with private fixtures; it stays hidden until you supply the content, so nothing shows "Coming soon", a placeholder, or a `#` link. Add only content you can stand behind: no invented metrics, dates, credentials, or links.
 
-## Status
+After any change, run the commands in [Check your changes](#check-your-changes). If the build fails, it names the file and field to fix. Do not remove validation to make it pass.
 
-| Input | State | Where to add it | Current fallback |
-| --- | --- | --- | --- |
-| Name, introduction, two project descriptions, roles, technologies, five social URLs | Supplied, used verbatim | `src/config/site.ts`, `src/content/projects/*.md`, `src/config/social.ts` | — |
-| Custom domain `ianhuynh.me` | Not connected. Leave `PUBLIC_SITE_ORIGIN` on the Vercel URL until a CV is attached and the domain is actually registered. | `productionOrigin` in `src/config/site.ts` | Live site stays on the Vercel URL |
-| Approved CV (PDF) | Not supplied | `public/cv/<file>.pdf` + `cvPath` in `src/config/site.ts` | Portfolio shows "See the projects" / "Get in touch" instead of Download CV |
-| Preferred public contact email | `huynhviethung070224@gmail.com`, from the LinkedIn PDF contact line | `contactEmail` in `src/config/site.ts` | Contact page shows a mailto and copy action |
-| Portrait / personal photos | Removed at the owner's request | `portrait` in `src/config/site.ts` | About uses the typographic monogram |
-| Education dates, program details | LinkedIn PDF: Drexel CCI, Bachelor’s in Data Science, Sep 2025–Jun 2030; ISHCMC American Academy high school diploma, Sep 2022–Jun 2025. Headline also says Honors. | `education[]` in `src/config/site.ts` | Shown on About and Portfolio |
-| Internship employer, role, dates | LinkedIn PDF: TPCOMS Software & Data Engineering Co-op, Ho Chi Minh City, Sep 2026–Present; Drexel VSA core team, Philadelphia, Oct 2025–Present. CodeFest is not on the PDF and was removed. | `experience[]` in `src/config/site.ts` | Shown on About and Portfolio |
-| Certificates / additional experience | LinkedIn PDF names two certificates and does not list issuers or dates | `certificates[]` in `src/config/portfolio.ts` | Titles only, no issuer line |
-| DragonGo screenshots | Six interface shots from the project README, plus the wordmark. No public demo URL. | `coverImage` and `gallery` in `dragon-go.md` | Home screen is the cover; the rest open in the case-study gallery |
-| DragonGo demo URL, repository URL | Not supplied | `demoUrl`, `repoUrl` in `dragon-go.md` | Live Demo / View Code buttons hidden |
-| DragonGo hackathon name, dates, team size, outcomes, technical decisions, lessons | Not supplied | `period`, `teamSize`, `status`, `outcomes` frontmatter; "Technical decisions" / "Lessons" sections in the body | Case study covers overview, contribution and how the pieces relate, from the approved text only |
-| Library Management System ERD / schema (six tables) | `DB setup.png` from the local library project folder. The stock `library.jpg` illustration was not used. | `coverImage` and `gallery` in `library-management-system.md` | ERD is the cover and can be zoomed |
-| Library Management System SQL queries and real outputs | Overdue query and branch-performance description are in the repo. No saved query output. | Body of `library-management-system.md` | Query is shown; result tables are not |
-| Library Management System repository URL | https://github.com/huynhviethung070224-beep/SQL_Library_Management_P2 | `repoUrl` in `library-management-system.md` | View Code is shown |
-| Blog articles | None written | `src/content/blog/<slug>.md` from `_template-new-post.md` | Designed empty state; RSS not emitted; no "Latest article" on Home |
-| Personal/project imagery for social previews | Not supplied | Generated OG images already exist per page; replace by editing `src/utils/og.ts` if photos should be used | Typographic OG template with identity + title |
+## What is still missing
 
-## Suggested article topics (drafts, not publications)
+| Content | Status today | Where it goes |
+| --- | --- | --- |
+| Resume PDF | Not added; no resume buttons anywhere | [Resume](#resume) |
+| Portrait photo | Not added; About shows the monogram, Home shows no photo | [Portrait](#portrait) |
+| Availability (roles, start date) | Not set; no availability line | [Availability](#availability) |
+| TPCOMS contributions | Card shows title, organization, and period only | [Experience and leadership](#experience-education-and-leadership) |
+| Certificate details (issuer, date, ID, verify link, file) | Two certificates are title-only | [Certificates](#certificates) |
+| Badminton demo video or screenshots | Case study has no media section | [Projects](#projects) |
+| Library SQL result tables or images | No results section | [Projects](#projects) |
+| Blog posts | Blog shows a designed empty state; no RSS feed | [Blog](#blog) |
 
-These were proposed by the owner as possible topics. None exist as articles yet; do not publish placeholder posts.
+Already live: contact email (`site.contactEmail`), social links, four projects, education, TPCOMS, and Drexel VSA.
 
-1. DragonGo project retrospective — what the backend/database work involved, Firebase Authentication + Firestore sync decisions.
-2. Lessons from relational database design — normalizing the six-table library schema, what changed and why.
-3. Learning software development through real projects — reflections from internship and project work.
+## Images and files: general rules
 
-## How to supply evidence without inventing it
+- Local files live in `public/`, and you refer to them with a path starting at the site root. For example, `public/projects/dragon-go/home.png` becomes `/projects/dragon-go/home.png`.
+- Every configured image needs truthful `alt` text and its real pixel `width` and `height`. On macOS run `sips -g pixelWidth -g pixelHeight <file>` to get the size.
+- If a configured file is missing, the build fails with the field name and the path it looked for.
+- External links must be full `https://` URLs (`npm test` rejects `http://`). Internal links must point to a published page or an existing file.
 
-- Screenshots: export at 2× (e.g. 1600×1000) as PNG/WebP, note the pixel size, write a one-sentence caption that states what is shown.
-- ERD: export from the modelling tool as PNG/SVG; the caption should name the six tables and the key relationships.
-- SQL: paste the actual query text and the actual output (first N rows is fine). Add one or two sentences on what the result tells the library.
-- Outcomes/dates/team: add only what can be confirmed (e.g. hackathon name and date, team size).
+## Resume
 
-## Verification completed (October 2026)
+1. Put the approved PDF at `public/resume/huynh-viet-hung-resume.pdf`.
+2. In `src/config/site.ts`, replace `resume: null as ResumeConfig | null` with:
 
-- `npm run check` (astro check): 0 errors, 0 warnings. `npm run build`: 9 pages + 8 OG images, sitemap, robots.
-- Playwright screenshots at 320 / 390 / 768 / 1440 px for all primary routes, both case studies and 404: no horizontal overflow at any width.
-- Mobile menu: opens with focus on the close control, closes on Escape and returns focus to the trigger, links navigate and show the active page.
-- Contact: all five tiles point to the exact approved URLs with `target="_blank"` and `rel="noopener noreferrer"` and accessible "(opens in a new tab)" labels.
-- Blog: verified with a temporary post (deleted afterwards) — reading time, TOC with active state, code label + copy (clipboard verified), table wrapper, progress bar, copy-article-link; `draft: true` removed it from routes, sitemap, RSS and OG output.
-- axe-core (WCAG 2.1 AA + best practices) at 390 and 1440 px on all routes: 0 violations after fixes.
-- Lighthouse (lab, local preview build): Home, DragonGo case study, Contact — Performance 100 / Accessibility 100 / Best Practices 100 / SEO 100 (desktop preset); Home mobile simulated: Performance 100, LCP 1.4 s, CLS 0, TBT 0 ms. These are lab numbers, not field data.
-- Not verified: real-device testing, the lightbox with real images (no images supplied yet; the component is wired for `gallery` entries), and hosting/domain behaviour.
+   ```ts
+   resume: {
+     path: '/resume/huynh-viet-hung-resume.pdf',
+     label: 'Download Resume', // optional
+     updatedAt: 'October 2026', // optional, shown next to the resume block
+   } as ResumeConfig | null,
+   ```
+
+The resume then appears in four places with no other changes:
+- the Home hero (Download);
+- the Home portfolio preview;
+- the Portfolio header;
+- a Portfolio "current resume" block with View (new tab) and Download.
+
+The build fails if the file is missing or is not a PDF.
+
+## Portrait
+
+1. Put the photo in `public/about/`, for example `public/about/portrait.webp`. JPEG, PNG and WebP all work; WebP or a well-compressed JPEG of about 1200 px is enough.
+2. In `src/config/site.ts`, replace `portrait: null as PortraitConfig | null` with:
+
+   ```ts
+   portrait: {
+     src: '/about/portrait.webp',
+     alt: 'Huynh Viet Hung (Ian) …', // describe the actual photo
+     width: 1200,
+     height: 1500,
+   } as PortraitConfig | null,
+   ```
+
+The photo then appears in the Home hero and on About.
+
+## Availability
+
+Leave `availability: null` until the details are confirmed. When they are, use this shape (the example values are not real):
+
+```ts
+availability: {
+  seeking: true,
+  roles: ['Data Analyst Co-op'],
+  startDate: 'Month Year',
+  note: 'Optional short sentence.',
+} as AvailabilityConfig | null,
+```
+
+It is shown in the Home hero, on About, and in the Portfolio header.
+
+## Experience, education, and leadership
+
+Edit the `education`, `workExperience`, or `leadership` array in `src/config/site.ts`. Each entry:
+
+```ts
+{
+  title: 'Role or degree',
+  organization: 'Organization',
+  location: 'City, State',                 // optional
+  period: 'Month Year – Month Year',       // optional
+  description: 'One approved sentence.',   // optional
+  contributions: ['What you did.'],        // optional, shown as bullets
+  technologies: ['SQL', 'Python'],         // optional, shown as chips
+  evidenceLinks: [                         // optional
+    { label: 'Library case study', url: '/projects/library-management-system' },
+    { label: 'Report', url: 'https://…' },
+  ],
+  order: 1,                                // lower comes first
+}
+```
+
+These entries feed the Portfolio sections ("Where I'm studying", "Professional experience", "Community involvement") and the About timeline. A group with no entries is hidden.
+
+Evidence links are checked at build time:
+- `/projects/<slug>` must be a published project;
+- `/blog/<slug>` must be a published post;
+- other local paths must be existing files in `public/`;
+- the main pages (`/`, `/about`, …) are always accepted.
+
+For TPCOMS, add `contributions` (and optionally `technologies`) to the existing entry once the details are approved.
+
+## Certificates
+
+Edit `certificates` in `src/config/portfolio.ts`. The two current entries are title-only. Add the details you have:
+
+```ts
+{
+  title: 'Databases and SQL for Data Science',
+  issuer: 'Issuer name',                                        // optional
+  issuedAt: 'Month Year',                                       // optional
+  credentialId: 'ID from the issuer',                           // optional
+  verificationUrl: 'https://…',                                 // optional; shows "Verify Credential"
+  asset: { type: 'pdf', src: '/certificates/sql-for-ds.pdf' },  // optional; or type 'image' with alt
+  order: 1,
+}
+```
+
+- Put the files in `public/certificates/`.
+- An image asset shows a thumbnail that opens in the image viewer.
+- A PDF asset shows a "View certificate" button.
+- With no certificates at all, the Credentials section is hidden.
+
+## Projects
+
+Templates (files starting with `_` are never published):
+- `src/content/projects/_template-new-project.md` for apps and general projects;
+- `src/content/projects/_template-data-analysis.md` for analysis or SQL case studies, with the `analysis` block (question, data sources, methods, findings, charts, limitations).
+
+Steps:
+1. Copy a template to `src/content/projects/<slug>.md`. The file name becomes the URL (`my-app.md` becomes `/projects/my-app`). Never reuse an existing slug, either as a file name or via a frontmatter `slug:`; a duplicate fails the build.
+2. Fill the required fields: `title`, `role`, `tagline`, `summary`, `technologies`, `cover` (`orbit` or `schema` illustration), `coverAlt`, `purpose`.
+3. Keep `draft: true` while you write. A draft has no page and appears in no list, filter, sitemap, or social image.
+4. When it is ready, set `draft: false` and choose the remaining settings:
+   - `featured: true` shows it in Home "Selected work". The heading counts the featured projects. If none are featured, Home shows the first two by `order`.
+   - `order` sets the position in lists and the "Next project" link (lower comes first).
+   - `earlier: true` moves it into the smaller "Earlier practice" list on `/projects`.
+   - `category` adds it to the Category filter. Filters appear only when there are 2 or more distinct values.
+
+Optional sections, each shown only when filled:
+
+- **Screenshots**: `coverImage` replaces the illustration; `gallery` holds captioned images that open in the viewer. Files go in `public/projects/<slug>/`.
+- **Video**: under `media`, add `type: video` with `src`, `title` and an optional `poster`.
+  - YouTube and Vimeo URLs are embedded (YouTube via the privacy-friendly `youtube-nocookie.com`).
+  - Local `.mp4`/`.webm` files in `public/projects/<slug>/` play inline.
+  - Any other HTTPS link becomes a "Watch video" card.
+  - A "Watch demo video" button is added to the project header automatically.
+- **Demo note**: `demoStatus` takes a factual line such as "Demo requires a club account." For Badminton, do not create sessions in the real app to make a demo; record the existing app or use screenshots.
+- **SQL or analysis results**: `results` with `type: table` (paste the real output as `rows`; numbers, dates and `null` need no quotes) or `type: image` (a chart or screenshot). Tables scroll inside their own box on phones. Only add output you actually ran.
+- **Other sections**: `outcomes`, `challenges`, `lessonsLearned`, and `resources` (notebooks, docs, datasets: label + type + URL).
+
+The table of contents appears automatically when a case study has 3 or more sections.
+
+Things that fail the build on purpose:
+- a duplicate slug;
+- a `#`, `javascript:`, or `mailto:` demo or repository URL;
+- a missing image or video file;
+- a table row with the wrong number of cells;
+- switching a project to `draft: true` while a Portfolio skill group (`skillGroups[].projectSlug` in `src/config/portfolio.ts`) or an evidence link still points to it. Update those references first.
+
+## Blog
+
+1. Copy `src/content/blog/_template-new-post.md` to `src/content/blog/<slug>.md`, which becomes `/blog/<slug>`.
+2. Fill `title`, `description`, the real `publishedAt` date, optional `updatedAt` and `tags`. Add an optional `cover` stored in `public/blog/<slug>/`.
+3. Keep `draft: true` while writing. A `publishedAt` date in the future also stays private until a build runs on or after that date.
+4. Set `draft: false` to publish.
+
+The first published post automatically enables:
+- the blog list with search and tag filters (shown once there are 2 or more posts);
+- the "Latest article" on Home;
+- related posts;
+- the RSS feed (`/rss.xml`) and its `<head>` link;
+- sitemap entries and a social preview image.
+
+In the article body:
+- code blocks get a language label and a Copy button;
+- tables scroll on phones;
+- an italic line directly under an image becomes its caption;
+- `##`/`###` headings feed the table of contents, shown for articles of 3+ minutes with 3+ headings.
+
+Body images are given their size automatically, but they are not schema-checked. Make sure the file exists; `npm run test:build` fails on an image path that is not in the build.
+
+## Check your changes
+
+```sh
+npm run dev                # preview at http://localhost:4321
+npm run validate:content   # schema and publication rules
+npm run check              # types and content schemas
+npm run build              # production build; fails on broken content
+npm test                   # full suite: unit + build artifacts + browser tests (Chromium and WebKit)
+npm run test:links         # optional: checks external links (needs internet)
+```
+
+`npm test` needs the Playwright browsers once: `npx playwright install chromium webkit`.
+
+To see what a fully filled or a minimal site looks like without touching real content, run `npm run fixture:ui -- full` or `npm run fixture:ui -- sparse`. These build a throwaway copy in the system temp folder; fixture content never enters `dist/`.
+
+## Not built (features, not missing content)
+
+These would need new code, not just content:
+
+- **No contact form or email sending.** Contact uses `mailto:` and copy-email only.
+- **No admin dashboard, login, or database.** Content is edited in the files above.
+- **No automatic image resizing.** Files in `public/` are served as uploaded, so export reasonably sized images (about 1600–2000 px wide for screenshots).
+- **Markdown body images don't open in the image viewer.** Use a project `gallery` or `results` image for zoomable evidence.
+- **Only one resume file.**
+- **No analytics, comments, newsletter, or site-wide search.** Search exists on `/projects` and `/blog` only.
+- **The site is not deployed or connected to `ianhuynh.me` by this work.** See README → Deploying.

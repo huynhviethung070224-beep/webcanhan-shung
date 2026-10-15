@@ -2,9 +2,48 @@
  * Central site/profile configuration.
  *
  * Edit this file to update the owner's identity, introduction, interests,
- * production origin, contact email and CV path. Presentation components read
+ * production origin, contact email, resume, portrait and availability. Presentation components read
  * from here and never hard-code these values.
  */
+
+import { validateContentLink, validateOptionalPublicAsset } from '../utils/validation';
+
+export interface EvidenceLink {
+  label: string;
+  url: string;
+}
+
+export interface TimelineEntry {
+  title: string;
+  organization: string;
+  location?: string;
+  period?: string;
+  description?: string;
+  contributions?: string[];
+  technologies?: string[];
+  evidenceLinks?: EvidenceLink[];
+  order: number;
+}
+
+export interface ResumeConfig {
+  path: string;
+  label?: string;
+  updatedAt?: string;
+}
+
+export interface PortraitConfig {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
+export interface AvailabilityConfig {
+  seeking?: boolean;
+  roles?: string[];
+  startDate?: string;
+  note?: string;
+}
 
 export const site = {
   /** Full public identity. Keep the full name visible across the site. */
@@ -33,14 +72,14 @@ export const site = {
   /** Preferred public contact email. `null` hides every email action. */
   contactEmail: 'huynhviethung070224@gmail.com',
 
-  /**
-   * Path (inside `public/`) to the approved CV PDF, e.g. '/cv/huynh-viet-hung-cv.pdf'.
-   * `null` hides the Download CV action everywhere.
-   */
-  cvPath: null as string | null,
+  /** Approved PDF only. `null` means no resume link is published. */
+  resume: null as ResumeConfig | null,
 
   /** Owner-supplied portrait (inside `public/`). `null` uses the typographic composition. */
-  portrait: null as { src: string; alt: string; width: number; height: number } | null,
+  portrait: null as PortraitConfig | null,
+
+  /** `null` makes no public availability claim. Populate only from owner-approved information. */
+  availability: null as AvailabilityConfig | null,
 
   /** Safe background facts used on About and Portfolio. */
   facts: {
@@ -56,32 +95,73 @@ export const site = {
   /** Education timeline. Dates and schools are from the exported LinkedIn PDF. */
   education: [
     {
-      institution: 'Drexel University College of Computing & Informatics',
-      detail: 'Bachelor’s degree, Data Science',
+      title: 'Bachelor’s degree, Data Science',
+      organization: 'Drexel University College of Computing & Informatics',
+      location: undefined,
+      description: undefined,
       period: 'Sep 2025 – Jun 2030',
+      order: 1,
     },
     {
-      institution: 'International School of Ho Chi Minh City – American Academy',
-      detail: 'High School Diploma',
+      title: 'High School Diploma',
+      organization: 'International School of Ho Chi Minh City – American Academy',
+      location: undefined,
+      description: undefined,
       period: 'Sep 2022 – Jun 2025',
+      order: 2,
     },
   ],
 
-  /** Experience timeline. Wording and dates are from the exported LinkedIn PDF. */
-  experience: [
+  /** Work experience. Description and contributions stay absent until supplied. */
+  workExperience: [
     {
-      title: 'Software & Data Engineering Co-op, TPCOMS',
-      detail: 'Ho Chi Minh City, Vietnam.',
+      title: 'Software & Data Engineering Co-op',
+      organization: 'TPCOMS',
+      location: 'Ho Chi Minh City, Vietnam',
+      description: undefined,
       period: 'Sep 2026 – Present',
+      order: 1,
     },
+  ] satisfies TimelineEntry[],
+
+  /** Leadership and activities, kept separate from paid/professional work. */
+  leadership: [
     {
-      title: 'Core Team Member, Drexel Vietnamese Student Association',
-      detail:
-        'Organizing activities that promote and expand Vietnamese culture within the Drexel student community. Philadelphia, PA.',
+      title: 'Core Team Member',
+      organization: 'Drexel Vietnamese Student Association',
+      location: 'Philadelphia, PA',
       period: 'Oct 2025 – Present',
+      description: 'Organizing activities that promote and expand Vietnamese culture within the Drexel student community.',
+      order: 1,
     },
-  ],
+  ] satisfies TimelineEntry[],
 } as const;
+
+validateOptionalPublicAsset(site.resume?.path, 'src/config/site.ts site.resume.path');
+validateOptionalPublicAsset(site.portrait?.src, 'src/config/site.ts site.portrait.src');
+if (site.resume && !site.resume.path.toLowerCase().endsWith('.pdf')) {
+  throw new Error('src/config/site.ts site.resume.path: the resume asset must be a PDF.');
+}
+if (site.portrait) {
+  if (!site.portrait.alt.trim()) throw new Error('src/config/site.ts site.portrait.alt: alt text cannot be empty.');
+  if (site.portrait.width <= 0 || site.portrait.height <= 0) {
+    throw new Error('src/config/site.ts site.portrait: width and height must be positive numbers.');
+  }
+}
+for (const [groupName, entries] of [
+  ['education', site.education],
+  ['workExperience', site.workExperience],
+  ['leadership', site.leadership],
+] as const) {
+  for (const [entryIndex, entry] of entries.entries()) {
+    const evidenceLinks = (entry as TimelineEntry).evidenceLinks;
+    if (evidenceLinks) {
+      evidenceLinks.forEach((link, linkIndex) =>
+        validateContentLink(link.url, `src/config/site.ts ${groupName}[${entryIndex}].evidenceLinks[${linkIndex}].url`),
+      );
+    }
+  }
+}
 
 /** Fixed primary route list. Navigation and footers are built from this. */
 export const navRoutes = [

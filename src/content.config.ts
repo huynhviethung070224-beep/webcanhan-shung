@@ -1,6 +1,10 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { z } from 'astro/zod';
+import { blogSchema, projectSchema } from './schemas/content';
+import { validateContentSourceSlugs } from './utils/validation';
+
+validateContentSourceSlugs('src/content/projects', 'projects');
+validateContentSourceSlugs('src/content/blog', 'blog');
 
 /**
  * Projects: one Markdown file per project in `src/content/projects/`.
@@ -9,53 +13,7 @@ import { z } from 'astro/zod';
  */
 const projects = defineCollection({
   loader: glob({ pattern: '**/[^_]*.md', base: './src/content/projects' }),
-  schema: z.object({
-    title: z.string(),
-    role: z.string(),
-    /** One-paragraph approved description (verbatim). */
-    summary: z.string(),
-    /** Short line used in compact previews. */
-    tagline: z.string(),
-    technologies: z.array(z.string()).min(1),
-    /** Illustrative cover variant until real screenshots are supplied. */
-    cover: z.enum(['orbit', 'schema']),
-    coverAlt: z.string(),
-    /** Real screenshot (inside `public/`). Replaces the illustrative cover when set. */
-    coverImage: z
-      .object({ src: z.string(), alt: z.string(), width: z.number(), height: z.number() })
-      .optional(),
-    /** How the cover image sits in the frame. Diagrams and logos use contain. */
-    coverFit: z.enum(['cover', 'contain']).default('cover'),
-    /** Browser chrome for product screenshots. Diagrams and logos stay plain. */
-    coverFrame: z.enum(['browser', 'plain']).default('plain'),
-    /** Smaller treatment on the projects index (earlier practice, not a main case study). */
-    earlier: z.boolean().default(false),
-    demoUrl: z.url().optional(),
-    repoUrl: z.url().optional(),
-    /** Compact factual overview shown at the top of the case study. */
-    purpose: z.string(),
-    /** Optional facts; rendered only when supplied. */
-    period: z.string().optional(),
-    teamSize: z.string().optional(),
-    status: z.string().optional(),
-    outcomes: z.array(z.string()).optional(),
-    /** Captioned evidence images (inside `public/`). */
-    gallery: z
-      .array(
-        z.object({
-          src: z.string(),
-          alt: z.string(),
-          caption: z.string().optional(),
-          width: z.number(),
-          height: z.number(),
-          frame: z.enum(['browser', 'plain']).default('plain'),
-        }),
-      )
-      .default([]),
-    order: z.number().default(0),
-    featured: z.boolean().default(false),
-    draft: z.boolean().default(false),
-  }),
+  schema: projectSchema,
 });
 
 /**
@@ -64,17 +22,7 @@ const projects = defineCollection({
  */
 const blog = defineCollection({
   loader: glob({ pattern: '**/[^_]*.md', base: './src/content/blog' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    publishedAt: z.coerce.date(),
-    updatedAt: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
-    cover: z
-      .object({ src: z.string(), alt: z.string(), width: z.number(), height: z.number() })
-      .optional(),
-    draft: z.boolean().default(false),
-  }),
+  schema: blogSchema,
 });
 
 export const collections = { projects, blog };

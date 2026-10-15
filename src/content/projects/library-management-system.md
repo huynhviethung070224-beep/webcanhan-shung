@@ -6,6 +6,7 @@ summary: A PostgreSQL project for managing books, members, branches, and borrowi
 technologies:
   - PostgreSQL
   - SQL
+category: Database & SQL
 cover: schema
 coverAlt: Entity diagram of the six library tables and their relationships.
 coverFit: contain
@@ -16,6 +17,20 @@ coverImage:
   height: 1716
 purpose: Manage books, members, branches, and borrowing records for a library with several branches.
 repoUrl: https://github.com/huynhviethung070224-beep/SQL_Library_Management_P2
+# Real query output only — paste rows exactly as PostgreSQL returned them.
+# results:
+#   - type: table
+#     title: Overdue books (first 5 rows)
+#     columns: [issued_member_id, member_name, book_title, issued_date, over_dues_days]
+#     rows:
+#       - [C106, Member name, Book title, 2024-03-10, 45]
+#     note: Run against the sample dataset in the repository on <date>.
+#   - type: image
+#     title: Branch performance report
+#     src: /projects/library-management-system/branch-report.png
+#     alt: Query output table of books issued, returned, and revenue per branch
+#     width: 1600
+#     height: 900
 gallery:
   - src: /projects/library-management-system/erd.png
     alt: Entity diagram showing branch, employees, members, books, issued_status, and return_status.

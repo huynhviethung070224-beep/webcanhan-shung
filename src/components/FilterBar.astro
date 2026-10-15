@@ -1,0 +1,326 @@
+---
+/**
+ * Lightweight client-side search + facet filters for a server-rendered list.
+ *
+ * The list stays complete and readable without JavaScript: this form ships
+ * `hidden` and is revealed by the script. Items opt in with
+ * `data-filter-item="<scope>"`, `data-filter-text`, and one
+ * `data-filter-<facet>` attribute per facet (values joined with "|").
+ * Optional hooks: `data-filter-group="<scope>"` (hidden when it has no visible
+ * items), `data-filter-empty="<scope>"` (shown when nothing matches) and
+ * `data-filter-reset="<scope>"` buttons. State is mirrored in the URL query.
+ */
+import Icon from './Icon.astro';
+
+export interface Facet {
+  /** Query-string key and `data-filter-<name>` suffix. */
+  name: string;
+  label: string;
+  options: string[];
+}
+
+interface Props {
+  scope: string;
+  searchLabel: string;
+  placeholder?: string;
+  facets: Facet[];
+  noun: { one: string; many: string };
+  total: number;
+}
+
+const { scope, searchLabel, placeholder, facets, noun, total } = Astro.props;
+const visibleFacets = facets.filter((facet) => facet.options.length >= 2);
+const searchId = `filter-${scope}-q`;
+---
+
+<form
+  class="filters"
+  role="search"
+  aria-label={searchLabel}
+  data-filter={scope}
+  data-noun-one={noun.one}
+  data-noun-many={noun.many}
+  data-total={total}
+  hidden
+>
+  <div class="filters__search">
+    <label for={searchId} class="filters__label mono">{searchLabel}</label>
+    <div class="filters__input">
+      <Icon name="search" size={18} class="filters__search-icon" />
+      <input id={searchId} type="search" name="q" placeholder={placeholder} autocomplete="off" spellcheck="false" />
+    </div>
+  </div>
+
+  {
+    visibleFacets.map((facet) => (
+      <fieldset class="filters__facet" data-facet={facet.name}>
+        <legend class="filters__label mono">{facet.label}</legend>
+        <div class="chips">
+          <label class="chip">
+            <input type="radio" name={facet.name} value="" checked />
+            <span>All</span>
+          </label>
+          {facet.options.map((option) => (
+            <label class="chip">
+              <input type="radio" name={facet.name} value={option} />
+              <span>{option}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    ))
+  }
+
+  <div class="filters__status">
+    <p class="filters__count mono" aria-live="polite" data-filter-count>
+      Showing all {total} {total === 1 ? noun.one : noun.many}
+    </p>
+    <button type="reset" class="btn btn--ghost btn--sm filters__reset" data-filter-clear>Reset filters</button>
+  </div>
+</form>
+
+<style>
+  .filters {
+    display: grid;
+    gap: var(--space-5);
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+  }
+
+  .filters[hidden] {
+    display: none;
+  }
+
+  .filters__label {
+    display: block;
+    margin-bottom: var(--space-2);
+    padding: 0;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--text-muted);
+  }
+
+  .filters__input {
+    position: relative;
+    max-width: 32rem;
+  }
+
+  .filters__input :global(.filters__search-icon) {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+
+  .filters__input input {
+    width: 100%;
+    min-height: var(--control-height);
+    padding: 0 0.9rem 0 2.6rem;
+    font: inherit;
+    font-size: var(--text-base);
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    transition: border-color var(--dur-hover) var(--ease-out);
+  }
+
+  .filters__input input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .filters__input input:hover {
+    border-color: var(--text-faint);
+  }
+
+  .filters__input input:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-color: var(--accent);
+  }
+
+  .filters__facet {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .chip {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .chip input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .chip span {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-height-sm);
+    padding: 0 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition:
+      color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out),
+      background var(--dur-hover) var(--ease-out);
+  }
+
+  .chip span:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .chip input:checked + span {
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .chip input:focus-visible + span {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .filters__status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+  }
+
+  .filters__count {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+  }
+</style>
+
+<script>
+  import { bindOnce, onPageReady } from '../scripts/lifecycle';
+  import { matchesFacet, matchesQuery, normalizeText } from '../utils/filters';
+
+  function facetNames(form: HTMLFormElement): string[] {
+    return Array.from(form.querySelectorAll<HTMLFieldSetElement>('[data-facet]')).map((f) => f.dataset.facet!);
+  }
+
+  function selected(form: HTMLFormElement, name: string): string {
+    return form.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value ?? '';
+  }
+
+  function apply(form: HTMLFormElement, syncUrl: boolean) {
+    const scope = form.dataset.filter!;
+    const query = form.querySelector<HTMLInputElement>('input[name="q"]')?.value ?? '';
+    const facets = facetNames(form).map((name) => ({ name, value: selected(form, name) }));
+    const items = Array.from(document.querySelectorAll<HTMLElement>(`[data-filter-item="${scope}"]`));
+
+    let visible = 0;
+    for (const item of items) {
+      const ok =
+        matchesQuery(item.dataset.filterText ?? item.textContent ?? '', query) &&
+        facets.every(({ name, value }) => matchesFacet((item.dataset[`filter${name[0]!.toUpperCase()}${name.slice(1)}`] ?? '').split('|'), value));
+      item.hidden = !ok;
+      if (ok) visible += 1;
+    }
+
+    document.querySelectorAll<HTMLElement>(`[data-filter-group="${scope}"]`).forEach((group) => {
+      group.hidden = !group.querySelector(`[data-filter-item="${scope}"]:not([hidden])`);
+    });
+    document.querySelectorAll<HTMLElement>(`[data-filter-empty="${scope}"]`).forEach((empty) => {
+      empty.hidden = visible > 0;
+    });
+
+    const total = items.length;
+    const one = form.dataset.nounOne ?? 'item';
+    const many = form.dataset.nounMany ?? 'items';
+    const active = Boolean(query.trim()) || facets.some((f) => f.value);
+    const count = form.querySelector<HTMLElement>('[data-filter-count]');
+    if (count) {
+      count.textContent = !active
+        ? `Showing all ${total} ${total === 1 ? one : many}`
+        : visible === 0
+          ? `No ${many} match these filters`
+          : `Showing ${visible} of ${total} ${total === 1 ? one : many}`;
+    }
+
+    if (syncUrl) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('q');
+      if (query.trim()) url.searchParams.set('q', query.trim());
+      for (const { name, value } of facets) {
+        url.searchParams.delete(name);
+        if (value) url.searchParams.set(name, value);
+      }
+      history.replaceState(history.state, '', url);
+    }
+  }
+
+  function restoreFromUrl(form: HTMLFormElement) {
+    const params = new URLSearchParams(window.location.search);
+    const search = form.querySelector<HTMLInputElement>('input[name="q"]');
+    if (search) search.value = params.get('q') ?? '';
+    for (const name of facetNames(form)) {
+      const wanted = normalizeText(params.get(name) ?? '');
+      const radios = Array.from(form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`));
+      const match = radios.find((r) => normalizeText(r.value) === wanted) ?? radios[0];
+      if (match) match.checked = true;
+    }
+  }
+
+  bindOnce('filter-reset', () => {
+    document.addEventListener('click', (event) => {
+      const btn = (event.target as Element | null)?.closest<HTMLElement>('[data-filter-reset]');
+      if (!btn) return;
+      const form = document.querySelector<HTMLFormElement>(`form[data-filter="${btn.dataset.filterReset}"]`);
+      if (!form) return;
+      form.reset();
+      form.querySelector<HTMLInputElement>('input[name="q"]')?.focus();
+    });
+  });
+
+  onPageReady(() => {
+    document.querySelectorAll<HTMLFormElement>('form[data-filter]').forEach((form) => {
+      if (!form.dataset.filterReady) {
+        form.dataset.filterReady = 'true';
+        form.hidden = false;
+        form.addEventListener('submit', (e) => e.preventDefault());
+        form.addEventListener('input', () => apply(form, true));
+        // `reset` fires before the fields change.
+        form.addEventListener('reset', () => window.setTimeout(() => apply(form, true)));
+        form.addEventListener('keydown', (e) => {
+          const target = e.target as HTMLElement;
+          if (e.key === 'Escape' && target instanceof HTMLInputElement && target.type === 'search' && target.value) {
+            e.preventDefault();
+            target.value = '';
+            apply(form, true);
+          }
+        });
+      }
+      restoreFromUrl(form);
+      apply(form, false);
+    });
+  });
+</script>

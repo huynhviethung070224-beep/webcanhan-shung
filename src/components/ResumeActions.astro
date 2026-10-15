@@ -1,0 +1,39 @@
+---
+/**
+ * View / Download actions for the configured resume PDF (`site.resume`).
+ * Renders nothing while no approved PDF is configured, so there is never a
+ * placeholder or broken link. The path is validated at build time.
+ */
+import { site } from '../config/site';
+import ExternalLink from './ExternalLink.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  /** Style of the download button. */
+  tone?: 'primary' | 'ghost';
+  /** Also offer "View" (opens the PDF in a new tab). */
+  view?: boolean;
+  size?: 'md' | 'sm';
+}
+
+const { tone = 'primary', view = true, size = 'md' } = Astro.props;
+const resume = site.resume;
+const fileName = resume?.path.split('/').pop();
+const sm = size === 'sm' ? 'btn--sm' : undefined;
+---
+
+{
+  resume && (
+    <>
+      <a href={resume.path} class:list={['btn', `btn--${tone}`, sm]} download={fileName} type="application/pdf">
+        {resume.label ?? 'Download Resume'} <Icon name="download" size={18} />
+        <span class="visually-hidden">(PDF)</span>
+      </a>
+      {view && (
+        <ExternalLink href={resume.path} class:list={['btn', 'btn--ghost', sm]}>
+          View Resume <Icon name="file" size={18} />
+        </ExternalLink>
+      )}
+    </>
+  )
+}

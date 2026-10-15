@@ -1,6 +1,6 @@
 ---
 # TEMPLATE — files starting with "_" are ignored by the site, and `draft: true` keeps a post
-# out of the public listing, the article routes and the sitemap.
+# out of every public output. A future `publishedAt` date is also private until that date.
 # Copy this file to `<slug>.md` (e.g. `dragongo-retrospective.md` -> /blog/dragongo-retrospective).
 title: Article title
 description: One or two sentences used in the listing, page metadata and social previews.
